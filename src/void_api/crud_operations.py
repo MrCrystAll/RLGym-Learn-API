@@ -9,7 +9,7 @@ from void_api.project_directory_generator import generate_project_directory
 
 def create_project(path: str, metadata: ProjectMetadata):
     _folder_path = os.path.join(
-        path, metadata.name.replace(" ", "_").lower()
+        path, ''.join(e for e in metadata.name.replace(" ", "_").lower() if e.isalnum() or e == "_")
     )
     
     metadata.path = _folder_path

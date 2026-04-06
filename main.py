@@ -9,8 +9,11 @@ sys.path.append(
     os.path.join(dirname(__file__), "src")
 )
 
-from void_api.api.api_crud_primitives import ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectsFetchArgs, ProjectsFetchReturn
-from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details
+from void_api.api.api_project import ProjectEntrypointStartArgs
+from void_api.project_operations import start_entrypoint
+
+from void_api.api.api_crud_primitives import ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectUpdateArgs, ProjectsFetchArgs, ProjectsFetchReturn
+from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, update_project
 
 app = FastAPI()
 
@@ -49,3 +52,11 @@ def api_get_project_data(args: ProjectGetDataArgs) -> ProjectGetDataReturn:
 @app.delete("/project/delete")
 def api_delete_project(args: ProjectDeleteArgs):
     delete_project(args.metadata)
+
+@app.put("/project")
+def api_update_project(args: ProjectUpdateArgs):
+    update_project(args.metadata)
+    
+@app.post("/project/start")
+def api_start_entrypoint(args: ProjectEntrypointStartArgs):
+    start_entrypoint(args.python_executable, args.metadata)

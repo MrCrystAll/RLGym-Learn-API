@@ -3,22 +3,25 @@ import pathlib
 import shutil
 
 from void_api.common_values import PROJECT_CONFIG_JSON_FILE
-from void_api.primitives import Project, ProjectData, ProjectMetadata
+from void_api.primitives import Project, ProjectData, ProjectLogConfig, ProjectMetadata
 from void_api.project_directory_generator import generate_project_directory
 
 
 def create_project(path: str, metadata: ProjectMetadata):
-    _folder_path = os.path.join(
+    _folder_path = pathlib.Path(os.path.join(
         path, ''.join(e for e in metadata.name.replace(" ", "_").lower() if e.isalnum() or e == "_")
-    )
+    ))
     
-    metadata.path = _folder_path
+    metadata.path = str(_folder_path)
     
     project = Project(
         metadata=metadata,
         data=ProjectData(
             rewards_files=[],
-            entrypoint=""
+            entrypoint="",
+            log_config=ProjectLogConfig(
+                stdout_log=str(_folder_path / "logs" / "stdout.log")
+            )
         )
     )
     
@@ -59,3 +62,15 @@ def delete_project(metadata: ProjectMetadata):
     assert metadata.path is not None, "Can't delete project if no path"
     
     shutil.rmtree(metadata.path, False)
+    
+def update_project(metadata: ProjectMetadata):
+    assert metadata.path is not None, "Can't update project if no path"
+
+    _path = pathlib.Path(metadata.path)
+    _config = _path / PROJECT_CONFIG_JSON_FILE
+    
+    # Load config
+    _pyd_config = Project.model_validate_json(_config.read_text())
+    _pyd_config.metadata = metadata
+    
+    _config.write_text(_pyd_config.model_dump_json())

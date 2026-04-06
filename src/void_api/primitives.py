@@ -2,14 +2,17 @@ from pydantic import BaseModel
 
 class ProjectMetadata(BaseModel):
     name: str
-    description: str | None
-    version: str
     id: str
     path: str | None = None
+    
+class ProjectLogConfig(BaseModel):
+    stdout_log: str
     
 class ProjectData(BaseModel):
     rewards_files: list[str]
     entrypoint: str
+    
+    log_config: ProjectLogConfig
 
 class Project(BaseModel):
     metadata: ProjectMetadata

@@ -23,3 +23,6 @@ class ProjectGetDataReturn(BaseModel, extra="forbid"):
     
 class ProjectDeleteArgs(BaseModel, extra="forbid"):
     metadata: ProjectMetadata
+    
+class ProjectUpdateArgs(BaseModel, extra="forbid"):
+    metadata: ProjectMetadata

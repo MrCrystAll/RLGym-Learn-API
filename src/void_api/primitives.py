@@ -11,6 +11,7 @@ class ProjectLogConfig(BaseModel):
 class ProjectData(BaseModel):
     rewards_files: list[str]
     entrypoint: str
+    interpreter: str
     
     log_config: ProjectLogConfig
 

@@ -1,6 +1,7 @@
 import os
 import pathlib
 import shutil
+import sys
 
 from void_api.common_values import PROJECT_CONFIG_JSON_FILE
 from void_api.primitives import Project, ProjectData, ProjectLogConfig, ProjectMetadata
@@ -21,7 +22,8 @@ def create_project(path: str, metadata: ProjectMetadata):
             entrypoint="",
             log_config=ProjectLogConfig(
                 stdout_log=str(_folder_path / "logs" / "stdout.log")
-            )
+            ),
+            interpreter=sys.executable
         )
     )
     

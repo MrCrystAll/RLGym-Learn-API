@@ -59,4 +59,4 @@ def api_update_project(args: ProjectUpdateArgs):
     
 @app.post("/project/start")
 def api_start_entrypoint(args: ProjectEntrypointStartArgs):
-    start_entrypoint(args.python_executable, args.metadata)
+    start_entrypoint(args.metadata)

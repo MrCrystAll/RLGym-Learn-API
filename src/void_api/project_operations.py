@@ -8,7 +8,7 @@ from void_api.common_values import PROJECT_CONFIG_JSON_FILE
 from void_api.primitives import Project, ProjectMetadata
 
 
-def start_entrypoint(python_path: str, project_metadata: ProjectMetadata):
+def start_entrypoint(project_metadata: ProjectMetadata):
     assert project_metadata.path is not None, "Can't start entrypoint if no path"
     
     _path = pathlib.Path(project_metadata.path)
@@ -24,7 +24,7 @@ def start_entrypoint(python_path: str, project_metadata: ProjectMetadata):
     
     with open(_log_path, "a", buffering=1) as f:  # line-buffered
         process = subprocess.Popen(
-            [python_path, _pyd_config.data.entrypoint],
+            [_pyd_config.data.interpreter, _pyd_config.data.entrypoint],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,

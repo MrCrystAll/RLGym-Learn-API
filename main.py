@@ -12,8 +12,8 @@ sys.path.append(
 from void_api.api.api_project import ProjectEntrypointStartArgs
 from void_api.project_operations import start_entrypoint
 
-from void_api.api.api_crud_primitives import ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectUpdateArgs, ProjectsFetchArgs, ProjectsFetchReturn
-from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, update_project
+from void_api.api.api_crud_primitives import ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectInterpreterUpdateArgs, ProjectUpdateArgs, ProjectsFetchArgs, ProjectsFetchReturn
+from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, update_project, update_project_python_interpreter
 
 app = FastAPI()
 
@@ -56,6 +56,10 @@ def api_delete_project(args: ProjectDeleteArgs):
 @app.put("/project")
 def api_update_project(args: ProjectUpdateArgs):
     update_project(args.metadata)
+    
+@app.put("/project/interpreter")
+def api_update_project_interpreter(args: ProjectInterpreterUpdateArgs):
+    update_project_python_interpreter(args.metadata, args.python_path)
     
 @app.post("/project/start")
 def api_start_entrypoint(args: ProjectEntrypointStartArgs):

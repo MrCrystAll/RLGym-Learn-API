@@ -26,3 +26,7 @@ class ProjectDeleteArgs(BaseModel, extra="forbid"):
     
 class ProjectUpdateArgs(BaseModel, extra="forbid"):
     metadata: ProjectMetadata
+    
+class ProjectInterpreterUpdateArgs(BaseModel, extra="forbid"):
+    metadata: ProjectMetadata
+    python_path: str

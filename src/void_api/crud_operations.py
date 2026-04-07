@@ -76,3 +76,14 @@ def update_project(metadata: ProjectMetadata):
     _pyd_config.metadata = metadata
     
     _config.write_text(_pyd_config.model_dump_json())
+
+def update_project_python_interpreter(metadata: ProjectMetadata, python_path: str):
+    assert metadata.path is not None, "Can't update project interpreter if no path"
+
+    _path = pathlib.Path(metadata.path)
+    _config = _path / PROJECT_CONFIG_JSON_FILE
+    
+    _pyd_config = Project.model_validate_json(_config.read_text())
+    _pyd_config.data.interpreter = python_path
+    
+    _config.write_text(_pyd_config.model_dump_json())

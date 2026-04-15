@@ -27,6 +27,7 @@ def start_entrypoint(project_metadata: ProjectMetadata):
             [_pyd_config.data.interpreter, _pyd_config.data.entrypoint],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            cwd=os.path.join(_pyd_config.data.entrypoint, ".."),
             text=True,
             bufsize=1, # line-buffered,
             env={**os.environ, "PYTHONUNBUFFERED": "1"}  # if spawning Python subprocesses

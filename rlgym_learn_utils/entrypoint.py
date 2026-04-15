@@ -1,4 +1,6 @@
 import os
+import pathlib
+import sys
 
 # needed to prevent numpy from using a ton of memory in env processes and causing them to throttle each other
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -78,10 +80,6 @@ def build_rlgym_v2_env():
 if __name__ == "__main__":
     from typing import Tuple
 
-    import numpy as np
-    from rlgym_learn_algos.logging import (
-        WandbMetricsLogger,
-    )
     from rlgym_learn_algos.ppo import (
         BasicCritic,
         DiscreteFF,
@@ -94,6 +92,8 @@ if __name__ == "__main__":
     from rlgym_learn import (
         LearningCoordinator,
     )
+    
+    from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 
     # The obs_space_type and action_space_type are determined by your choice of ObsBuilder and ActionParser respectively.
     # The logic used here assumes you are using the types defined by the DefaultObs and LookupTableAction above.
@@ -109,18 +109,28 @@ if __name__ == "__main__":
 
     def critic_factory(obs_space: DefaultObsSpaceType, device: str):
         return BasicCritic(obs_space[1], (256, 256, 256), device)
+    
+    try:
+        
+        _pyd_config = LearningCoordinatorConfigModel.model_validate_json(
+            pathlib.Path("config.json").read_text()
+        )
 
-    learning_coordinator = LearningCoordinator(
-        build_rlgym_v2_env,
-        agent_controllers={
-            "PPO1": PPOAgentController(
-                actor_factory=actor_factory,
-                critic_factory=critic_factory,
-                experience_buffer=NumpyExperienceBuffer(GAETrajectoryProcessor()),
-                metrics_logger=WandbMetricsLogger(PPOMetricsLogger()),
-                obs_standardizer=None,
-            )
-        },
-        config_location="config.json",
-    )
-    learning_coordinator.start()
+        learning_coordinator = LearningCoordinator(
+            build_rlgym_v2_env,
+            agent_controllers={
+                agent: PPOAgentController(
+                    actor_factory=actor_factory,
+                    critic_factory=critic_factory,
+                    experience_buffer=NumpyExperienceBuffer(GAETrajectoryProcessor()),
+                    metrics_logger=PPOMetricsLogger(),
+                    obs_standardizer=None,
+                ) for agent in _pyd_config.agent_controllers_config.keys()
+            },
+            config_location="config.json",
+        )
+        learning_coordinator.start()
+        print("Process finished.")
+    except Exception as e:
+        print(e)
+        sys.exit(1)

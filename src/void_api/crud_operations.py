@@ -3,7 +3,10 @@ import pathlib
 import shutil
 import sys
 
-from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+import numpy as np
+from pydantic import ValidationError
+from rlgym_learn.learning_coordinator_config import BaseConfigModel, LearningCoordinatorConfigModel, SerdeTypesModel
+from rlgym_learn.rlgym_learn import PyAnySerdeType
 
 from void_api.common_values import PROJECT_CONFIG_JSON_FILE
 from void_api.primitives import Project, ProjectData, ProjectLogConfig, ProjectMetadata
@@ -97,8 +100,40 @@ def update_config(metadata: ProjectMetadata, config: LearningCoordinatorConfigMo
     _path = pathlib.Path(metadata.path)
     _config = _path / PROJECT_CONFIG_JSON_FILE
     
+    for agent in config.agent_controllers_config.keys():
+        try:
+            config.agent_controllers_config[agent].pop("type")
+        except KeyError:
+            pass
+    
     _pyd_config = Project.model_validate_json(_config.read_text())
     
     pathlib.Path(_pyd_config.data.config_file).write_text(
         config.model_dump_json()
     )
+    
+def get_project_learning_config(metadata: ProjectMetadata) -> LearningCoordinatorConfigModel:
+    assert metadata.path is not None, "Can't get config if no path"
+    
+    _path = pathlib.Path(metadata.path)
+    _config = _path / PROJECT_CONFIG_JSON_FILE
+    
+    _pyd_config = Project.model_validate_json(_config.read_text())
+    
+    try:
+        return LearningCoordinatorConfigModel.model_validate_json(pathlib.Path(_pyd_config.data.config_file).read_text())
+    except (ValidationError, EOFError, OSError):
+        return LearningCoordinatorConfigModel(base_config=BaseConfigModel(
+            serde_types=SerdeTypesModel(
+                agent_id_serde_type=PyAnySerdeType.STRING(),
+                action_serde_type=PyAnySerdeType.NUMPY(np.int64),
+                obs_serde_type=PyAnySerdeType.NUMPY(np.float64),
+                reward_serde_type=PyAnySerdeType.FLOAT(),
+                obs_space_serde_type=PyAnySerdeType.TUPLE(
+                    (PyAnySerdeType.STRING(), PyAnySerdeType.INT())
+                ),
+                action_space_serde_type=PyAnySerdeType.TUPLE(
+                    (PyAnySerdeType.STRING(), PyAnySerdeType.INT())
+                ),
+            ),
+        ))

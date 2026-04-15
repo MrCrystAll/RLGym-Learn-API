@@ -13,7 +13,7 @@ from void_api.api.api_project import ProjectEntrypointStartArgs
 from void_api.project_operations import start_entrypoint
 
 from void_api.api.api_crud_primitives import ProjectConfigUpdateArgs, ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectInterpreterUpdateArgs, ProjectUpdateArgs, ProjectsFetchArgs, ProjectsFetchReturn
-from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, update_config, update_project, update_project_python_interpreter
+from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, get_project_learning_config, update_config, update_project, update_project_python_interpreter
 
 app = FastAPI()
 
@@ -47,7 +47,8 @@ def api_get_all_projects(args: ProjectsFetchArgs) -> ProjectsFetchReturn:
 @app.post("/project/getDetails")
 def api_get_project_data(args: ProjectGetDataArgs) -> ProjectGetDataReturn:
     _project_data = get_project_details(args.metadata)
-    return ProjectGetDataReturn(project_data=_project_data)
+    _config = get_project_learning_config(args.metadata)
+    return ProjectGetDataReturn(project_data=_project_data, config=_config)
 
 @app.delete("/project/delete")
 def api_delete_project(args: ProjectDeleteArgs):

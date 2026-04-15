@@ -11,7 +11,7 @@ def generate_entrypoint(path: str | os.PathLike[str], project: Project):
     if _path.exists():
         raise OSError(f"There is already an entrypoint for the project {project.metadata.name}")
     
-    shutil.copy("entrypoint.py", _path)
+    shutil.copy(os.path.join("rlgym_learn_utils", "entrypoint.py"), _path)
     
     project.data.entrypoint = str(_path)
     

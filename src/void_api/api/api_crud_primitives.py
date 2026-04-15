@@ -22,6 +22,7 @@ class ProjectGetDataArgs(BaseModel, extra="forbid"):
     
 class ProjectGetDataReturn(BaseModel, extra="forbid"):
     project_data: ProjectData
+    config: LearningCoordinatorConfigModel
     
 class ProjectDeleteArgs(BaseModel, extra="forbid"):
     metadata: ProjectMetadata
@@ -33,6 +34,6 @@ class ProjectInterpreterUpdateArgs(BaseModel, extra="forbid"):
     metadata: ProjectMetadata
     python_path: str
     
-class ProjectConfigUpdateArgs(BaseModel):
+class ProjectConfigUpdateArgs(BaseModel, extra="forbid"):
     metadata: ProjectMetadata
     config: LearningCoordinatorConfigModel

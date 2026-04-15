@@ -2,7 +2,7 @@ import os
 from posixpath import dirname
 import sys
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
 from starlette.middleware.cors import CORSMiddleware
 
 sys.path.append(
@@ -12,8 +12,8 @@ sys.path.append(
 from void_api.api.api_project import ProjectEntrypointStartArgs
 from void_api.project_operations import start_entrypoint
 
-from void_api.api.api_crud_primitives import ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectInterpreterUpdateArgs, ProjectUpdateArgs, ProjectsFetchArgs, ProjectsFetchReturn
-from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, update_project, update_project_python_interpreter
+from void_api.api.api_crud_primitives import ProjectConfigUpdateArgs, ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectInterpreterUpdateArgs, ProjectUpdateArgs, ProjectsFetchArgs, ProjectsFetchReturn
+from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, update_config, update_project, update_project_python_interpreter
 
 app = FastAPI()
 
@@ -64,3 +64,10 @@ def api_update_project_interpreter(args: ProjectInterpreterUpdateArgs):
 @app.post("/project/start")
 def api_start_entrypoint(args: ProjectEntrypointStartArgs):
     start_entrypoint(args.metadata)
+    
+@app.put("/project/config")
+async def api_update_config(request: Request):
+    raw = await request.body()
+    config = ProjectConfigUpdateArgs.model_validate_json(raw)
+    
+    update_config(config.metadata, config.config)

@@ -3,6 +3,8 @@ import pathlib
 import shutil
 import sys
 
+from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+
 from void_api.common_values import PROJECT_CONFIG_JSON_FILE
 from void_api.primitives import Project, ProjectData, ProjectLogConfig, ProjectMetadata
 from void_api.project_directory_generator import generate_project_directory
@@ -23,7 +25,8 @@ def create_project(path: str, metadata: ProjectMetadata):
             log_config=ProjectLogConfig(
                 stdout_log=str(_folder_path / "logs" / "stdout.log")
             ),
-            interpreter=sys.executable
+            interpreter=sys.executable,
+            config_file=str(_folder_path / "config.json")
         )
     )
     
@@ -87,3 +90,15 @@ def update_project_python_interpreter(metadata: ProjectMetadata, python_path: st
     _pyd_config.data.interpreter = python_path
     
     _config.write_text(_pyd_config.model_dump_json())
+    
+def update_config(metadata: ProjectMetadata, config: LearningCoordinatorConfigModel):
+    assert metadata.path is not None, "Can't update config if no path"
+    
+    _path = pathlib.Path(metadata.path)
+    _config = _path / PROJECT_CONFIG_JSON_FILE
+    
+    _pyd_config = Project.model_validate_json(_config.read_text())
+    
+    pathlib.Path(_pyd_config.data.config_file).write_text(
+        config.model_dump_json()
+    )

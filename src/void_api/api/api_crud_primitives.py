@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 from void_api.primitives import Project, ProjectData, ProjectMetadata
 
+from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+
 class ProjectCreationArgs(BaseModel, extra="forbid"):
     path: str
     metadata: ProjectMetadata
@@ -30,3 +32,7 @@ class ProjectUpdateArgs(BaseModel, extra="forbid"):
 class ProjectInterpreterUpdateArgs(BaseModel, extra="forbid"):
     metadata: ProjectMetadata
     python_path: str
+    
+class ProjectConfigUpdateArgs(BaseModel):
+    metadata: ProjectMetadata
+    config: LearningCoordinatorConfigModel

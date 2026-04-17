@@ -2,18 +2,17 @@ import os
 from posixpath import dirname
 import sys
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Response
 from starlette.middleware.cors import CORSMiddleware
 
 sys.path.append(
     os.path.join(dirname(__file__), "src")
 )
 
-from void_api.api.api_project import ProjectEntrypointStartArgs
-from void_api.project_operations import start_entrypoint
+from void_api.api.api_crud_primitives import ProjectCreationArgs, ProjectCreationReturn, ProjectsFetchArgs, ProjectsFetchReturn
+from void_api.crud_operations import create_project, get_all_projects
 
-from void_api.api.api_crud_primitives import ProjectConfigUpdateArgs, ProjectCreationArgs, ProjectCreationReturn, ProjectDeleteArgs, ProjectGetDataArgs, ProjectGetDataReturn, ProjectInterpreterUpdateArgs, ProjectUpdateArgs, ProjectsFetchArgs, ProjectsFetchReturn
-from void_api.crud_operations import create_project, delete_project, get_all_projects, get_project_details, get_project_learning_config, update_config, update_project, update_project_python_interpreter
+from void_api.routers.project_router import router as project_router
 
 app = FastAPI()
 
@@ -23,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(project_router)
 
 @app.get("/")
 def ping():
@@ -43,32 +44,3 @@ def api_get_all_projects(args: ProjectsFetchArgs) -> ProjectsFetchReturn:
     _projects = get_all_projects(args.path)
     
     return ProjectsFetchReturn(projects=_projects)
-
-@app.post("/project/getDetails")
-def api_get_project_data(args: ProjectGetDataArgs) -> ProjectGetDataReturn:
-    _project_data = get_project_details(args.metadata)
-    _config = get_project_learning_config(args.metadata)
-    return ProjectGetDataReturn(project_data=_project_data, config=_config)
-
-@app.delete("/project/delete")
-def api_delete_project(args: ProjectDeleteArgs):
-    delete_project(args.metadata)
-
-@app.put("/project")
-def api_update_project(args: ProjectUpdateArgs):
-    update_project(args.metadata)
-    
-@app.put("/project/interpreter")
-def api_update_project_interpreter(args: ProjectInterpreterUpdateArgs):
-    update_project_python_interpreter(args.metadata, args.python_path)
-    
-@app.post("/project/start")
-def api_start_entrypoint(args: ProjectEntrypointStartArgs):
-    start_entrypoint(args.metadata)
-    
-@app.put("/project/config")
-async def api_update_config(request: Request):
-    raw = await request.body()
-    config = ProjectConfigUpdateArgs.model_validate_json(raw)
-    
-    update_config(config.metadata, config.config)

@@ -92,7 +92,7 @@ if __name__ == "__main__":
     from rlgym_learn import (
         LearningCoordinator,
     )
-    
+
     from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 
     # The obs_space_type and action_space_type are determined by your choice of ObsBuilder and ActionParser respectively.
@@ -109,9 +109,8 @@ if __name__ == "__main__":
 
     def critic_factory(obs_space: DefaultObsSpaceType, device: str):
         return BasicCritic(obs_space[1], (256, 256, 256), device)
-    
+
     try:
-        
         _pyd_config = LearningCoordinatorConfigModel.model_validate_json(
             pathlib.Path("config.json").read_text()
         )
@@ -125,7 +124,8 @@ if __name__ == "__main__":
                     experience_buffer=NumpyExperienceBuffer(GAETrajectoryProcessor()),
                     metrics_logger=PPOMetricsLogger(),
                     obs_standardizer=None,
-                ) for agent in _pyd_config.agent_controllers_config.keys()
+                )
+                for agent in _pyd_config.agent_controllers_config.keys()
             },
             config_location="config.json",
         )

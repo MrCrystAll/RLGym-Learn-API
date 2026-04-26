@@ -11,4 +11,4 @@ class Run(BaseModel):
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Run):
             return False
-        return self.name == value.name
+        return self.name == value.name and self.project_id == value.project_id

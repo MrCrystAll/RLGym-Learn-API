@@ -70,7 +70,10 @@ async def update_project_config(
     raw = await request.body()
     config = LearningCoordinatorConfigModel.model_validate_json(raw)
 
-    project_service.update_project_config(project_id, config)
+    try:
+        project_service.update_project_config(project_id, config)
+    except AssertionError as e:
+        return Response(str(e), status_code=400)
 
 
 @router.get("/all", operation_id="get_all_projects")

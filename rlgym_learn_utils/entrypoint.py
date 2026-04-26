@@ -2,6 +2,8 @@ import os
 import pathlib
 import sys
 
+from numpy import std
+
 # needed to prevent numpy from using a ton of memory in env processes and causing them to throttle each other
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
@@ -132,5 +134,5 @@ if __name__ == "__main__":
         learning_coordinator.start()
         print("Process finished.")
     except Exception as e:
-        print(e)
+        print(e, file=sys.stderr, flush=True)
         sys.exit(1)

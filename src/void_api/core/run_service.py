@@ -7,17 +7,24 @@ class RunService:
         self, project_service: ProjectService, run_service: InfrastructureRunService
     ) -> None:
         self.project_service = project_service
-        self.run_service = run_service
+        self.infra_service = run_service
 
     def _check_project_exists(self, project_id: str):
         if not self.project_service.project_exists(project_id):
             raise ValueError(f"Project {project_id} doesn't exist")
 
+    def run_exists(self, project_id: str, run_name: str) -> bool:
+        self._check_project_exists(project_id)
+
+        return self.infra_service.run_exists(
+            self.project_service.root_folder, project_id, run_name
+        )
+
     def create_run(self, project_id: str, run_name: str):
         self._check_project_exists(project_id)
 
         try:
-            self.run_service.create_run(
+            self.infra_service.create_run(
                 self.project_service.root_folder, project_id, run_name
             )
         except FileExistsError as e:
@@ -28,11 +35,11 @@ class RunService:
     def delete_run(self, project_id: str, run_name: str):
         self._check_project_exists(project_id)
 
-        self.run_service.delete_run(
+        self.infra_service.delete_run(
             self.project_service.root_folder, project_id, run_name
         )
 
     def get_all_runs(self, project_id: str):
         self._check_project_exists(project_id)
 
-        return self.run_service.get_runs(self.project_service.root_folder, project_id)
+        return self.infra_service.get_runs(self.project_service.root_folder, project_id)

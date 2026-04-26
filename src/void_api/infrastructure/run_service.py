@@ -15,3 +15,7 @@ class InfrastructureRunService(ABC):
     @abstractmethod
     def delete_run(self, path: str, project_id: str, run_name: str):
         pass
+
+    @abstractmethod
+    def run_exists(self, path: str, project_id: str, run_name: str) -> bool:
+        pass

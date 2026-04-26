@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 import shutil
@@ -20,6 +21,7 @@ class FSRunService(InfrastructureRunService):
 
         # Running this before because it checks whether a run with a given name already exists
         os.makedirs(_path / run_name)
+        (_path / run_name / "sessions.json").write_text(json.dumps([]))
 
         _pyd_runs.append(_run)
         (_path / "runs.json").write_text(ta.dump_json(_pyd_runs).decode())
@@ -52,3 +54,12 @@ class FSRunService(InfrastructureRunService):
         shutil.rmtree(_path / run_name, ignore_errors=False)
 
         (_path / "runs.json").write_text(ta.dump_json(_pyd_runs).decode())
+
+    def run_exists(self, path: str, project_id: str, run_name: str) -> bool:
+        _runs = self.get_runs(path, project_id)
+
+        for _run in _runs:
+            if _run.name == run_name:
+                return True
+
+        return False

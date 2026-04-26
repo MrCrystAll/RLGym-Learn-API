@@ -21,12 +21,12 @@ router = APIRouter(prefix="/project", tags=["project"])
 def update_root(
     args: ProjectUpdateRoot,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> None:
     project_service.update_root_folder(args)
 
 
 @router.get("/root", operation_id="get_root_folder")
-def get_root(project_service: Annotated[ProjectService, Depends(get_project_service)]):
+def get_root(project_service: Annotated[ProjectService, Depends(get_project_service)]) -> str:
     return project_service.root_folder
 
 
@@ -34,7 +34,7 @@ def get_root(project_service: Annotated[ProjectService, Depends(get_project_serv
 def create_project(
     args: ProjectCreationArgs,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> str:
     try:
         return project_service.create_project(args)
     except ValueError as e:
@@ -45,7 +45,7 @@ def create_project(
 def delete_project(
     project_id: str,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> None:
     try:
         project_service.delete_project(project_id)
     except OSError as e:
@@ -57,7 +57,7 @@ def update_project_metadata(
     project_id: str,
     project_metadata: ProjectUpdateMetadata,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> None:
     project_service.update_project_metadata(project_id, project_metadata)
 
 
@@ -66,7 +66,7 @@ async def update_project_config(
     project_id: str,
     request: Request,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> None:
     raw = await request.body()
     config = LearningCoordinatorConfigModel.model_validate_json(raw)
 
@@ -100,7 +100,7 @@ def get_project_data(
 def get_project_metadata(
     project_id: str,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> ProjectMetadata:
     try:
         return project_service.get_project_metadata(project_id)
     except OSError as e:

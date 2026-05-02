@@ -1,3 +1,4 @@
+from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from void_api.core.project_service import ProjectService
 from void_api.infrastructure.run_service import InfrastructureRunService
 
@@ -43,3 +44,15 @@ class RunService:
         self._check_project_exists(project_id)
 
         return self.infra_service.get_runs(self.project_service.root_folder, project_id)
+
+    def update_run_data(
+        self, project_id: str, run_name: str, config: LearningCoordinatorConfigModel
+    ):
+        self.infra_service.update_run_data(
+            self.project_service.root_folder, project_id, run_name, config
+        )
+
+    def get_run_data(self, project_id: str, run_name: str):
+        return self.infra_service.get_run_data(
+            self.project_service.root_folder, project_id, run_name
+        )

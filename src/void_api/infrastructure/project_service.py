@@ -1,13 +1,10 @@
 from abc import ABC, abstractmethod
 
+from void_api.desc.project import ProjectMetadata
 from void_api.desc.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
 )
-
-from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
-
-from void_api.desc.project import ProjectMetadata
 
 
 class InfrastructureProjectService(ABC):
@@ -26,19 +23,7 @@ class InfrastructureProjectService(ABC):
         pass
 
     @abstractmethod
-    def update_project_config(
-        self, path: str, project_id: str, project_config: LearningCoordinatorConfigModel
-    ):
-        pass
-
-    @abstractmethod
     def get_all_projects(self, path: str) -> list[ProjectMetadata]:
-        pass
-
-    @abstractmethod
-    def get_project_data(
-        self, path: str, project_id: str
-    ) -> LearningCoordinatorConfigModel:
         pass
 
     @abstractmethod

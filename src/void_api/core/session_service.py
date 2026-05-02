@@ -1,5 +1,5 @@
-from datetime import datetime
 import os
+from datetime import datetime
 
 from void_api.core.project_service import ProjectService
 from void_api.core.run_service import RunService
@@ -20,15 +20,15 @@ class SessionService:
         self.infra_service = infra_service
 
         self.session_handler = SessionHandler()
-        
+
     def _on_end_session(self, session: Session, return_code: int):
         if return_code == 0:
             session.status = "finished"
         else:
             session.status = "crashed"
-        
+
         self.session_handler.remove_session(session.session_id)
-        
+
         try:
             self.infra_service.update_session(self.project_service.root_folder, session)
         except FileNotFoundError:
@@ -49,8 +49,12 @@ class SessionService:
             project_id=project_id,
             run_name=run_name,
             logs=LogConfig(
-                stdout=os.path.join(project_id, "logs", _sid, "out.log"),
-                stderr=os.path.join(project_id, "logs", _sid, "err.log"),
+                stdout=os.path.join(
+                    project_id, "runs", run_name, "logs", _sid, "out.log"
+                ),
+                stderr=os.path.join(
+                    project_id, "runs", run_name, "logs", _sid, "err.log"
+                ),
             ),
         )
 
@@ -60,7 +64,7 @@ class SessionService:
             self.project_service.root_folder,
             self.project_service.get_project_metadata(project_id),
             _session,
-            self._on_end_session
+            self._on_end_session,
         )
 
         self.session_handler.add_session(_sid, _process)
@@ -75,4 +79,6 @@ class SessionService:
         self.session_handler.wait_for_session(session_id)
 
     def get_all_sessions(self, project_id: str, run_name: str) -> list[Session]:
-        return self.infra_service.get_all_sessions(self.project_service.root_folder, project_id, run_name)
+        return self.infra_service.get_all_sessions(
+            self.project_service.root_folder, project_id, run_name
+        )

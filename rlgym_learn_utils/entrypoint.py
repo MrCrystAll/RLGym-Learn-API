@@ -1,8 +1,7 @@
 import os
 import pathlib
 import sys
-
-from numpy import std
+import traceback
 
 # needed to prevent numpy from using a ton of memory in env processes and causing them to throttle each other
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -82,6 +81,10 @@ def build_rlgym_v2_env():
 if __name__ == "__main__":
     from typing import Tuple
 
+    from rlgym_learn import (
+        LearningCoordinator,
+    )
+    from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
     from rlgym_learn_algos.ppo import (
         BasicCritic,
         DiscreteFF,
@@ -90,12 +93,18 @@ if __name__ == "__main__":
         PPOAgentController,
         PPOMetricsLogger,
     )
-
-    from rlgym_learn import (
-        LearningCoordinator,
+    from rlgym_learn_algos.util.checkpoint_saving.checkpoint_handler import (
+        CheckpointHandler,
+    )
+    from rlgym_learn_algos.util.checkpoint_saving.loading_strategy import (
+        LoadLatestCheckpoint,
+    )
+    from rlgym_learn_algos.util.checkpoint_saving.saving_strategy import (
+        KeepLastCheckpoints,
+        SaveTimestamps,
     )
 
-    from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+    from rlgym_learn_gui.metrics_logger import GUIMetricsLogger
 
     # The obs_space_type and action_space_type are determined by your choice of ObsBuilder and ActionParser respectively.
     # The logic used here assumes you are using the types defined by the DefaultObs and LookupTableAction above.
@@ -124,7 +133,11 @@ if __name__ == "__main__":
                     actor_factory=actor_factory,
                     critic_factory=critic_factory,
                     experience_buffer=NumpyExperienceBuffer(GAETrajectoryProcessor()),
-                    metrics_logger=PPOMetricsLogger(),
+                    metrics_logger=GUIMetricsLogger(PPOMetricsLogger()),
+                    checkpoint_handler=CheckpointHandler(
+                        load_strategy=LoadLatestCheckpoint(),
+                        save_strategy=KeepLastCheckpoints(SaveTimestamps()),
+                    ),
                     obs_standardizer=None,
                 )
                 for agent in _pyd_config.agent_controllers_config.keys()
@@ -134,5 +147,7 @@ if __name__ == "__main__":
         learning_coordinator.start()
         print("Process finished.")
     except Exception as e:
-        print(e, file=sys.stderr, flush=True)
+        _lines = traceback.format_exception(e)
+        for _line in _lines:
+            print(_line, file=sys.stderr, flush=True)
         sys.exit(1)

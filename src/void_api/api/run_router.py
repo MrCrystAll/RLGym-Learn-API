@@ -61,7 +61,6 @@ async def update_project_config(
         return Response(str(e), status_code=400)
 
 
-@router.get("/all", operation_id="get_all_projects")
 @router.delete("", operation_id="delete_run")
 def delete_run(
     args: RunDeletionArgs, run_service: Annotated[RunService, Depends(get_run_service)]

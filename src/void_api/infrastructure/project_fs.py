@@ -3,7 +3,6 @@ import os
 import pathlib
 import shutil
 
-import numpy as np
 from rlgym_learn.learning_coordinator_config import (
     BaseConfigModel,
     LearningCoordinatorConfigModel,

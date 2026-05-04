@@ -6,7 +6,6 @@ import shutil
 from pydantic import TypeAdapter
 from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from void_api.desc.run import Run
-from void_api.infrastructure.filesystem.project_service import PROJECT_CONFIG_JSON_FILE
 from void_api.infrastructure.project_fs import generate_config, generate_entrypoint
 from void_api.infrastructure.run_service import InfrastructureRunService
 

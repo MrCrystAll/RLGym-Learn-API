@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, Response
-from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+from fastapi import APIRouter, Depends, Response
 from void_api.api.services import get_project_service
 from void_api.core.project_service import ProjectService
 from void_api.desc.project import ProjectMetadata

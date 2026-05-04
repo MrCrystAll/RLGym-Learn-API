@@ -104,6 +104,7 @@ if __name__ == "__main__":
         SaveTimestamps,
     )
 
+    from rlgym_learn_gui.gui_agent_controller import GUIAgentController
     from rlgym_learn_gui.metrics_logger import GUIMetricsLogger
 
     # The obs_space_type and action_space_type are determined by your choice of ObsBuilder and ActionParser respectively.
@@ -129,16 +130,20 @@ if __name__ == "__main__":
         learning_coordinator = LearningCoordinator(
             build_rlgym_v2_env,
             agent_controllers={
-                agent: PPOAgentController(
-                    actor_factory=actor_factory,
-                    critic_factory=critic_factory,
-                    experience_buffer=NumpyExperienceBuffer(GAETrajectoryProcessor()),
-                    metrics_logger=GUIMetricsLogger(PPOMetricsLogger()),
-                    checkpoint_handler=CheckpointHandler(
-                        load_strategy=LoadLatestCheckpoint(),
-                        save_strategy=KeepLastCheckpoints(SaveTimestamps()),
-                    ),
-                    obs_standardizer=None,
+                agent: GUIAgentController(
+                    PPOAgentController(
+                        actor_factory=actor_factory,
+                        critic_factory=critic_factory,
+                        experience_buffer=NumpyExperienceBuffer(
+                            GAETrajectoryProcessor()
+                        ),
+                        metrics_logger=GUIMetricsLogger(PPOMetricsLogger()),
+                        checkpoint_handler=CheckpointHandler(
+                            load_strategy=LoadLatestCheckpoint(),
+                            save_strategy=KeepLastCheckpoints(SaveTimestamps()),
+                        ),
+                        obs_standardizer=None,
+                    )
                 )
                 for agent in _pyd_config.agent_controllers_config.keys()
             },

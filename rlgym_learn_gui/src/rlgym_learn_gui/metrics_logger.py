@@ -28,24 +28,24 @@ def convert_nested_dict(d):
 
 
 class GUIMetricsLoggerConfig(BaseModel, Generic[InnerMetricsLoggerConfig]):
-    session_id: str
-    port: int
+    session_id: str | None = None
+    port: int | None = None
 
     inner_metrics_logger_config: dict[str, Any] | InnerMetricsLoggerConfig | None = None
 
 
 @dataclass
-class GUIAdditionalDerivedConfig(Generic[InnerMetricsLoggerDerivedConfig]):
+class GUIDerivedConfig(Generic[InnerMetricsLoggerDerivedConfig]):
     metrics_logger_config: GUIMetricsLoggerConfig
-    inner_metrics_logger_additional_derived_config: InnerMetricsLoggerDerivedConfig = (
-        None
-    )
+    session_id: str | None = None
+    port: int | None = None
+    inner_metrics_logger_derived_config: InnerMetricsLoggerDerivedConfig = None
 
 
 class GUIMetricsLogger(
     MetricsLogger[
         GUIMetricsLoggerConfig[InnerMetricsLoggerConfig],
-        GUIAdditionalDerivedConfig[InnerMetricsLoggerDerivedConfig],
+        GUIDerivedConfig[InnerMetricsLoggerDerivedConfig],
         AgentControllerData,
     ],
     Generic[
@@ -92,9 +92,27 @@ class GUIMetricsLogger(
     def load(self, config):
         self.config = config
 
+        _session_id = config.metrics_logger_config.session_id
+        if _session_id is None:
+            _session_id = config.additional_derived_config.session_id
+
+            if _session_id is None:
+                raise ValueError(
+                    "No session id provided by the user nor by the agent controller"
+                )
+
+        _port = config.metrics_logger_config.port
+        if _port is None:
+            _port = config.additional_derived_config.port
+
+            if _port is None:
+                raise ValueError(
+                    "No port provided by the user nor by the agent controller"
+                )
+
         self.gui_communicator = GUICommunicator(
-            config.metrics_logger_config.session_id,
-            config.metrics_logger_config.port,
+            _session_id,
+            _port,
             "metrics_logger",
         )
 
@@ -103,7 +121,7 @@ class GUIMetricsLogger(
                 checkpoint_load_folder=config.checkpoint_load_folder,
                 agent_controller_name=config.agent_controller_name,
                 metrics_logger_config=config.metrics_logger_config.inner_metrics_logger_config,
-                additional_derived_config=config.additional_derived_config.inner_metrics_logger_additional_derived_config
+                additional_derived_config=config.additional_derived_config.inner_metrics_logger_derived_config
                 if config.additional_derived_config is not None
                 else None,
             )

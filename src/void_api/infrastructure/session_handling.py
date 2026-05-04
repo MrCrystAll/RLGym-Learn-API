@@ -83,7 +83,7 @@ class SessionHandler:
             return -1
 
         try:
-            return self.sessions[session_id].wait(5.0)
+            return self.sessions[session_id].wait(20.0)
         except subprocess.TimeoutExpired:
             self.sessions[session_id].terminate()
             return -1

@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response
+
 from void_api.api.services import get_project_service
 from void_api.core.project_service import ProjectService
 from void_api.desc.project import ProjectMetadata
@@ -17,12 +18,14 @@ router = APIRouter(prefix="/project", tags=["project"])
 def update_root(
     args: ProjectUpdateRoot,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> None:
     project_service.update_root_folder(args)
 
 
 @router.get("/root", operation_id="get_root_folder")
-def get_root(project_service: Annotated[ProjectService, Depends(get_project_service)]):
+def get_root(
+    project_service: Annotated[ProjectService, Depends(get_project_service)],
+) -> str:
     return project_service.root_folder
 
 
@@ -30,7 +33,7 @@ def get_root(project_service: Annotated[ProjectService, Depends(get_project_serv
 def create_project(
     args: ProjectCreationArgs,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> str:
     try:
         return project_service.create_project(args)
     except ValueError as e:
@@ -41,7 +44,7 @@ def create_project(
 def delete_project(
     project_id: str,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> None:
     try:
         project_service.delete_project(project_id)
     except OSError as e:
@@ -53,7 +56,7 @@ def update_project_metadata(
     project_id: str,
     project_metadata: ProjectUpdateMetadata,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> None:
     try:
         project_service.update_project_metadata(project_id, project_metadata)
     except OSError as e:
@@ -71,7 +74,7 @@ def get_all_projects(
 def get_project_metadata(
     project_id: str,
     project_service: Annotated[ProjectService, Depends(get_project_service)],
-):
+) -> ProjectMetadata:
     try:
         return project_service.get_project_metadata(project_id)
     except OSError as e:

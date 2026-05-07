@@ -1,9 +1,12 @@
 import os
-
+import shutil
 
 if __name__ == "__main__":
     print("Deleting directory...")
-    os.system("rm -r client")
+    try:
+        shutil.rmtree("./client")
+    except FileNotFoundError:
+        pass
     print("Generating")
     os.system(
         "npx @openapitools/openapi-generator-cli generate -i \

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from void_api.api.services import get_run_service
 from void_api.core.run_service import RunService
+from void_api.desc.run import Run
 from void_api.desc.run_crud_schemas import RunCreationArgs, RunDeletionArgs
 
 router = APIRouter(prefix="/runs", tags=["runs"])
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/runs", tags=["runs"])
 @router.post("/create", operation_id="create_run")
 def create_run(
     args: RunCreationArgs, run_service: Annotated[RunService, Depends(get_run_service)]
-):
+) -> None:
     try:
         run_service.create_run(args.project_id, args.run_name)
     except FileExistsError as e:
@@ -24,7 +25,7 @@ def create_run(
 @router.get("/all", operation_id="get_all_runs")
 def get_all_runs(
     project_id: str, run_service: Annotated[RunService, Depends(get_run_service)]
-):
+) -> list[Run]:
     try:
         return run_service.get_all_runs(project_id)
     except ValueError as e:
@@ -64,7 +65,7 @@ async def update_project_config(
 @router.delete("", operation_id="delete_run")
 def delete_run(
     args: RunDeletionArgs, run_service: Annotated[RunService, Depends(get_run_service)]
-):
+) -> None:
     try:
         run_service.delete_run(args.project_id, args.run_name)
     except (FileNotFoundError, ValueError) as e:

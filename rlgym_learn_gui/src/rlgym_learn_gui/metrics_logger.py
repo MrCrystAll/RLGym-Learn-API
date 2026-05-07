@@ -9,7 +9,7 @@ from rlgym_learn_algos.logging.metrics_logger import (
     MetricsLogger,
 )
 
-from rlgym_learn_gui.gui_communication import GUICommunicator
+from rlgym_learn_gui.communication import GUICommunicator
 
 InnerMetricsLoggerConfig = TypeVar("InnerMetricsLoggerConfig")
 InnerMetricsLoggerDerivedConfig = TypeVar("InnerMetricsLoggerDerivedConfig")
@@ -39,7 +39,7 @@ class GUIDerivedConfig(Generic[InnerMetricsLoggerDerivedConfig]):
     metrics_logger_config: GUIMetricsLoggerConfig
     session_id: str | None = None
     port: int | None = None
-    inner_metrics_logger_derived_config: InnerMetricsLoggerDerivedConfig = None
+    inner_metrics_logger_derived_config: InnerMetricsLoggerDerivedConfig | None = None
 
 
 class GUIMetricsLogger(

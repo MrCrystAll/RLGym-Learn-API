@@ -2,9 +2,10 @@ import json
 import os
 import pathlib
 import shutil
+from typing import Any
 
 from pydantic import TypeAdapter
-from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+
 from void_api.desc.run import Run
 from void_api.infrastructure.project_fs import generate_config, generate_entrypoint
 from void_api.infrastructure.run_service import InfrastructureRunService
@@ -88,9 +89,7 @@ class FSRunService(InfrastructureRunService):
 
         return False
 
-    def get_run_data(
-        self, path: str, project_id: str, run_name: str
-    ) -> LearningCoordinatorConfigModel:
+    def get_run_data(self, path: str, project_id: str, run_name: str) -> dict[str, Any]:
         _path = self._get_run_root_path(path, project_id, run_name)
 
         if not _path.is_dir():
@@ -106,16 +105,14 @@ class FSRunService(InfrastructureRunService):
                 "The project doesn't have any configuration, this means it is probably corrupted"
             )
 
-        return LearningCoordinatorConfigModel.model_validate_json(
-            (_path / "src" / "config.json").read_text()
-        )
+        return json.loads((_path / "src" / "config.json").read_text())
 
     def update_run_data(
         self,
         path: str,
         project_id: str,
         run_name: str,
-        project_config: LearningCoordinatorConfigModel,
+        raw_config: dict[str, Any],
     ):
         _path = (
             pathlib.Path(self._get_src_path(path, project_id, run_name)) / "config.json"
@@ -123,4 +120,4 @@ class FSRunService(InfrastructureRunService):
 
         assert _path.exists(), "The config does not exist for this project"
 
-        _path.write_text(project_config.model_dump_json())
+        _path.write_text(json.dumps(raw_config))

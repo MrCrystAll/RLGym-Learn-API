@@ -8,6 +8,7 @@ from void_api.core.session_service import SessionService
 from void_api.desc.session import Session
 from void_api.desc.session_crud_schemas import (
     SessionGetAllArgs,
+    SessionGetHealth,
     SessionSetSpacesArgs,
     SessionStartArgs,
 )
@@ -33,7 +34,7 @@ def stop_session(
     session_service: Annotated[SessionService, Depends(get_session_service)],
 ) -> None:
     try:
-        session_service.stop_session(session_id)
+        return session_service.stop_session(session_id)
     except ValueError as e:
         return Response(str(e), 404)
 
@@ -51,19 +52,14 @@ def get_all_sessions(
         return Response(str(e), 417)
 
 
-@router.post("/{session_id}/metrics", include_in_schema=False)
-def update_metrics(
+@router.post("/{session_id}/health", operation_id="get_session_health")
+def get_session_health(
     session_id: str,
-    metrics: dict[str, Any],
+    args: SessionGetHealth,
     session_service: Annotated[SessionService, Depends(get_session_service)],
-):
-    return JSONResponse(
-        {
-            "reason": "TODO: Implement metrics",
-            "data": metrics,
-            "session_id": session_id,
-        },
-        status_code=501,
+) -> str:
+    return session_service.get_session_health(
+        args.project_id, args.run_name, session_id
     )
 
 

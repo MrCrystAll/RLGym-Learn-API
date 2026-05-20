@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, List, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationInfo, model_validator
 from rlgym_learn.api.typing import AgentControllerData
 from rlgym_learn_algos.logging.dict_metrics_logger import DictMetricsLogger
 from rlgym_learn_algos.logging.metrics_logger import (
@@ -12,7 +12,6 @@ from rlgym_learn_algos.logging.metrics_logger import (
 from rlgym_learn_gui.communication import GUICommunicator
 
 InnerMetricsLoggerConfig = TypeVar("InnerMetricsLoggerConfig")
-InnerMetricsLoggerDerivedConfig = TypeVar("InnerMetricsLoggerDerivedConfig")
 
 
 def convert_nested_dict(d):
@@ -28,43 +27,74 @@ def convert_nested_dict(d):
 
 
 class GUIMetricsLoggerConfig(BaseModel, Generic[InnerMetricsLoggerConfig]):
-    session_id: str | None = None
+    run_name: str | None = None
+    project_id: str | None = None
     port: int | None = None
 
-    inner_metrics_logger_config: dict[str, Any] | InnerMetricsLoggerConfig | None = None
+    inner_metrics_logger_config: InnerMetricsLoggerConfig | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_metrics_logger_config_model(cls, data: Any, info: ValidationInfo):
+        inner_metrics_logger: MetricsLogger | None = info.context
+        if inner_metrics_logger is None:
+            return data
+
+        if isinstance(data, dict) and "inner_metrics_logger_config" in data:
+            inner_metrics_logger_config_raw = data["inner_metrics_logger_config"]
+
+            if isinstance(inner_metrics_logger_config_raw, dict):
+                metrics_logger_config_model_type: Type[Optional[BaseModel]] = (
+                    inner_metrics_logger.config_model
+                )
+                if metrics_logger_config_model_type == type(None):
+                    metrics_logger_config = None
+                else:
+                    metrics_logger_config = (
+                        metrics_logger_config_model_type.model_validate(
+                            inner_metrics_logger_config_raw,
+                            context=inner_metrics_logger,
+                        )
+                    )
+            else:
+                metrics_logger_config = inner_metrics_logger_config_raw
+            data["metrics_logger_config"] = metrics_logger_config
+
+        return data
 
 
 @dataclass
-class GUIDerivedConfig(Generic[InnerMetricsLoggerDerivedConfig]):
+class GUIDerivedConfig:
     metrics_logger_config: GUIMetricsLoggerConfig
-    session_id: str | None = None
-    port: int | None = None
-    inner_metrics_logger_derived_config: InnerMetricsLoggerDerivedConfig | None = None
 
 
 class GUIMetricsLogger(
     MetricsLogger[
+        None,
         GUIMetricsLoggerConfig[InnerMetricsLoggerConfig],
-        GUIDerivedConfig[InnerMetricsLoggerDerivedConfig],
         AgentControllerData,
     ],
     Generic[
         InnerMetricsLoggerConfig,
-        InnerMetricsLoggerDerivedConfig,
         AgentControllerData,
     ],
 ):
     def __init__(
         self,
         inner_metrics_logger: DictMetricsLogger[
-            InnerMetricsLoggerConfig,
-            InnerMetricsLoggerDerivedConfig,
-            AgentControllerData,
+            None, InnerMetricsLoggerConfig | None, AgentControllerData
         ],
         checkpoint_file_name: str = "gui_metrics_logger.json",
     ):
         self.inner_metrics_logger = inner_metrics_logger
         self.checkpoint_file_name = checkpoint_file_name
+
+    @property
+    def config_model(self) -> Type[GUIMetricsLoggerConfig]:
+        """
+        Function to return the config model type that your MetricsLogger implementation uses. Defaults to NoneType.
+        """
+        return GUIMetricsLoggerConfig
 
     def collect_env_metrics(self, data: List[Dict[str, Any]]):
         self.inner_metrics_logger.collect_env_metrics(data)
@@ -74,44 +104,27 @@ class GUIMetricsLogger(
 
     def report_metrics(self):
         _metrics = convert_nested_dict(self.inner_metrics_logger.get_metrics())
-        self.gui_communicator.send_metrics(_metrics)
+        self.gui_communicator.send_metrics(
+            self.config.metrics_logger_config.project_id,
+            self.config.metrics_logger_config.run_name,
+            _metrics,
+        )
         self.inner_metrics_logger.report_metrics()
-
-    def validate_config(self, config_obj: Any) -> GUIMetricsLoggerConfig:
-        _base_config = GUIMetricsLoggerConfig.model_validate(config_obj)
-
-        if _base_config.inner_metrics_logger_config is not None:
-            _base_config.inner_metrics_logger_config = (
-                self.inner_metrics_logger.validate_config(
-                    config_obj["inner_metrics_logger_config"]
-                )
-            )
-
-        return _base_config
 
     def load(self, config):
         self.config = config
 
-        _session_id = config.metrics_logger_config.session_id
-        if _session_id is None:
-            _session_id = config.additional_derived_config.session_id
-
-            if _session_id is None:
-                raise ValueError(
-                    "No session id provided by the user nor by the agent controller"
-                )
+        _run_name = config.metrics_logger_config.run_name
+        if _run_name is None:
+            raise ValueError(
+                "No run name provided by the user nor by the agent controller"
+            )
 
         _port = config.metrics_logger_config.port
         if _port is None:
-            _port = config.additional_derived_config.port
-
-            if _port is None:
-                raise ValueError(
-                    "No port provided by the user nor by the agent controller"
-                )
+            raise ValueError("No port provided by the user nor by the agent controller")
 
         self.gui_communicator = GUICommunicator(
-            _session_id,
             _port,
             "metrics_logger",
         )
@@ -119,10 +132,7 @@ class GUIMetricsLogger(
         self.inner_metrics_logger.load(
             DerivedMetricsLoggerConfig(
                 checkpoint_load_folder=config.checkpoint_load_folder,
-                agent_controller_name=config.agent_controller_name,
+                derived_agent_controller_config=config.derived_agent_controller_config,
                 metrics_logger_config=config.metrics_logger_config.inner_metrics_logger_config,
-                additional_derived_config=config.additional_derived_config.inner_metrics_logger_derived_config
-                if config.additional_derived_config is not None
-                else None,
             )
         )

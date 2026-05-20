@@ -50,10 +50,22 @@ class SessionService:
             run_name=run_name,
             logs=LogConfig(
                 stdout=os.path.join(
-                    project_id, "runs", run_name, "logs", _sid, "out.log"
+                    self.project_service.root_folder,
+                    project_id,
+                    "runs",
+                    run_name,
+                    "logs",
+                    _sid,
+                    "out.log",
                 ),
                 stderr=os.path.join(
-                    project_id, "runs", run_name, "logs", _sid, "err.log"
+                    self.project_service.root_folder,
+                    project_id,
+                    "runs",
+                    run_name,
+                    "logs",
+                    _sid,
+                    "err.log",
                 ),
             ),
         )
@@ -76,9 +88,19 @@ class SessionService:
             raise ValueError(f"Session {session_id} ended or doesn't exist")
 
         self.session_handler.save_and_stop(session_id)
-        self.session_handler.wait_for_session(session_id)
+        return self.session_handler.wait_for_session(session_id)
 
     def get_all_sessions(self, project_id: str, run_name: str) -> list[Session]:
         return self.infra_service.get_all_sessions(
             self.project_service.root_folder, project_id, run_name
+        )
+
+    def get_session_health(
+        self, project_id: str, run_name: str, session_id: str
+    ) -> str:
+        return self._get_session(project_id, run_name, session_id).status
+
+    def _get_session(self, project_id: str, run_name: str, session_id: str) -> Session:
+        return self.infra_service.get_session(
+            self.project_service.root_folder, project_id, run_name, session_id
         )

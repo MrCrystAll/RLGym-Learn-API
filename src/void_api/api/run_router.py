@@ -1,7 +1,9 @@
-from typing import Annotated
+import json
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Request, Response
-from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+from fastapi.responses import JSONResponse
+
 from void_api.api.services import get_run_service
 from void_api.core.run_service import RunService
 from void_api.desc.run import Run
@@ -46,20 +48,38 @@ def get_run_data(
         return Response(content=str(e), status_code=417)
 
 
-@router.put("/{project_id}/{run_name}/config", operation_id="update_project_config")
-async def update_project_config(
+@router.put("/{project_id}/{run_name}/config", operation_id="update_run_config")
+async def update_run_config(
     project_id: str,
     run_name: str,
     request: Request,
     run_service: Annotated[RunService, Depends(get_run_service)],
 ):
     raw = await request.body()
-    config = LearningCoordinatorConfigModel.model_validate_json(raw)
+    _raw_config = json.loads(raw)
 
     try:
-        run_service.update_run_data(project_id, run_name, config)
+        run_service.update_run_data(project_id, run_name, _raw_config)
     except AssertionError as e:
         return Response(str(e), status_code=400)
+
+
+@router.post("/{project_id}/{run_name}/metrics", include_in_schema=False)
+def update_metrics(
+    project_id: str,
+    run_name: str,
+    metrics: dict[str, Any],
+    run_service: Annotated[RunService, Depends(get_run_service)],
+):
+    return JSONResponse(
+        {
+            "reason": "TODO: Implement metrics",
+            "data": metrics,
+            "project_id": project_id,
+            "run_name": run_name,
+        },
+        status_code=501,
+    )
 
 
 @router.delete("", operation_id="delete_run")

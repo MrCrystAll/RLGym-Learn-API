@@ -18,3 +18,8 @@ class SessionSetSpacesArgs(BaseModel, Generic[ObsSpaceType, ActionSpaceType]):
     agent_controller_name: str
     obs_space: ObsSpaceType
     act_space: ActionSpaceType
+
+
+class SessionGetHealth(BaseModel):
+    run_name: str
+    project_id: str

@@ -9,10 +9,9 @@ URL = "http://localhost"
 
 
 class GUICommunicator(Generic[ObsSpaceType, ActionSpaceType]):
-    def __init__(self, session_id: str, port: int, name: str) -> None:
+    def __init__(self, port: int, name: str) -> None:
         self.name = name
         self.port = port
-        self.session_id = session_id
 
     def is_gui_alive(self) -> bool:
         try:
@@ -22,7 +21,7 @@ class GUICommunicator(Generic[ObsSpaceType, ActionSpaceType]):
 
         return _response.ok
 
-    def send_metrics(self, metrics: dict[str, Any]):
+    def send_metrics(self, project_id: str, run_name: str, metrics: dict[str, Any]):
         if not self.is_gui_alive():
             print("GUI couldn't be found, ignoring", file=sys.stderr)
             return
@@ -32,12 +31,13 @@ class GUICommunicator(Generic[ObsSpaceType, ActionSpaceType]):
                 metrics[k] = float(metrics[k])
 
         post(
-            f"{URL}:{self.port}/sessions/{self.session_id}/metrics",
+            f"{URL}:{self.port}/runs/{project_id}/{run_name}/metrics",
             json=metrics,
         )
 
     def set_spaces_types(
         self,
+        session_id: str,
         agent_controller_name: str,
         obs_space: ObsSpaceType,
         act_space: ActionSpaceType,
@@ -47,7 +47,7 @@ class GUICommunicator(Generic[ObsSpaceType, ActionSpaceType]):
             return
 
         post(
-            f"{URL}:{self.port}/sessions/{self.session_id}/spaces",
+            f"{URL}:{self.port}/sessions/{session_id}/spaces",
             json={
                 "agent_controller_name": agent_controller_name,
                 "obs_space": obs_space,

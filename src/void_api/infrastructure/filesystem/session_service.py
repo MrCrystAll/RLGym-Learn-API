@@ -2,6 +2,7 @@ import os
 import pathlib
 
 from pydantic import TypeAdapter
+
 from void_api.desc.session import Session
 from void_api.infrastructure.session_service import InfrastructureSessionService
 
@@ -11,10 +12,10 @@ class FSSessionService(InfrastructureSessionService):
         _path = pathlib.Path(root_folder)
 
         # Create log structure
-        os.makedirs((_path / session.logs.stdout).parent)
+        os.makedirs(pathlib.Path(session.logs.stdout).parent)
 
-        (_path / session.logs.stdout).touch()
-        (_path / session.logs.stderr).touch()
+        pathlib.Path(session.logs.stdout).touch()
+        pathlib.Path(session.logs.stderr).touch()
 
         _session_path = (
             _path / session.project_id / "runs" / session.run_name / "sessions.json"

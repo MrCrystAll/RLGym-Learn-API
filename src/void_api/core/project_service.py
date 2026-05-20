@@ -1,4 +1,3 @@
-from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from void_api.desc.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,

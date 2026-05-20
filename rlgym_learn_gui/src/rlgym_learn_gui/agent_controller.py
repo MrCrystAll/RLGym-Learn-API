@@ -1,6 +1,6 @@
-from typing import Any, Dict, Generic, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Generic, Iterable, List, Optional, Tuple, Type
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationInfo, model_validator
 from rlgym.api import (
     ActionSpaceType,
     ActionType,
@@ -21,7 +21,7 @@ from rlgym_learn.api.typing import (
 )
 from rlgym_learn.rlgym_learn import EnvActionResponse, Timestep
 
-from rlgym_learn_gui.gui_communication import GUICommunicator
+from rlgym_learn_gui.communication import GUICommunicator
 
 
 class GUIAgentControllerConfig(BaseModel, Generic[AgentControllerConfig]):
@@ -29,6 +29,37 @@ class GUIAgentControllerConfig(BaseModel, Generic[AgentControllerConfig]):
 
     session_id: str
     port: int
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_agent_controller_config_model(cls, data: Any, info: ValidationInfo):
+        agent_controller: AgentController | None = info.context
+        if agent_controller is None:
+            return data
+
+        print()
+
+        if isinstance(data, dict) and "inner_agent_controller_config" in data:
+            inner_agent_controller_config_raw = data["inner_agent_controller_config"]
+
+            if isinstance(inner_agent_controller_config_raw, dict):
+                inner_agent_controller_config_model_type: Type[Optional[BaseModel]] = (
+                    agent_controller.inner_agent_controller.config_model
+                )
+                if inner_agent_controller_config_model_type == type(None):
+                    inner_agent_controller_config = None
+                else:
+                    inner_agent_controller_config = (
+                        inner_agent_controller_config_model_type.model_validate(
+                            inner_agent_controller_config_raw,
+                            context=agent_controller.inner_agent_controller,
+                        )
+                    )
+            else:
+                inner_agent_controller_config = inner_agent_controller_config_raw
+            data["inner_agent_controller_config"] = inner_agent_controller_config
+
+        return data
 
 
 class GUIAgentController(
@@ -74,16 +105,28 @@ class GUIAgentController(
     ):
         self.inner_agent_controller = inner_agent_controller
 
+    @property
+    def config_model(self) -> Type[GUIAgentControllerConfig]:
+        """
+        Function to return the config model type that your AgentController implementation uses. Defaults to NoneType.
+        """
+        return GUIAgentControllerConfig
+
     def validate_config(
         self, config_obj: Dict[str, Any]
     ) -> GUIAgentControllerConfig[AgentControllerConfig]:
         _gui_config = GUIAgentControllerConfig.model_validate(config_obj)
 
-        _gui_config.inner_agent_controller_config = (
-            self.inner_agent_controller.validate_config(
-                config_obj["inner_agent_controller_config"]
+        _agent_controller_config_model = self.inner_agent_controller.config_model
+
+        print(_agent_controller_config_model)
+        if _agent_controller_config_model != type(None):
+            _gui_config.inner_agent_controller_config = (
+                _agent_controller_config_model.model_validate(
+                    config_obj["inner_agent_controller_config"]
+                )
             )
-        )
+            print(_gui_config.inner_agent_controller_config)
 
         return _gui_config
 
@@ -140,14 +183,16 @@ class GUIAgentController(
         self.config = config
 
         self.gui_communicator = GUICommunicator(
-            config.agent_controller_config.session_id,
             config.agent_controller_config.port,
             "agent_controller",
         )
 
         # Doing this here because set_space_types is called before load (for obvious reasons that some components need it)
         self.gui_communicator.set_spaces_types(
-            self.config.agent_controller_name, self.obs_space, self.action_space
+            self.config.agent_controller_config.session_id,
+            self.config.agent_controller_name,
+            self.obs_space,
+            self.action_space,
         )
 
         self.inner_agent_controller.load(

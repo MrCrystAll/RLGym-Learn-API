@@ -21,7 +21,16 @@ def start_entrypoint(
     _entrypoint = _path / "src" / "main.py"
 
     process = subprocess.Popen(
-        [project_metadata.interpreter, _entrypoint],
+        [
+            project_metadata.interpreter,
+            _entrypoint,
+            "--session",
+            session.session_id,
+            "--run",
+            session.run_name,
+            "--project",
+            session.project_id,
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         stdin=subprocess.PIPE,

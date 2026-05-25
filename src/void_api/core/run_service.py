@@ -1,3 +1,5 @@
+from typing import Any
+
 from void_api.core.project_service import ProjectService
 from void_api.infrastructure.run_service import InfrastructureRunService
 
@@ -43,3 +45,15 @@ class RunService:
         self._check_project_exists(project_id)
 
         return self.infra_service.get_runs(self.project_service.root_folder, project_id)
+
+    def update_run_data(
+        self, project_id: str, run_name: str, raw_config: dict[str, Any]
+    ):
+        self.infra_service.update_run_data(
+            self.project_service.root_folder, project_id, run_name, raw_config
+        )
+
+    def get_run_data(self, project_id: str, run_name: str):
+        return self.infra_service.get_run_data(
+            self.project_service.root_folder, project_id, run_name
+        )

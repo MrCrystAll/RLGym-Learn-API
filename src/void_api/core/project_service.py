@@ -5,8 +5,6 @@ from void_api.desc.project_crud_schemas import (
 )
 from void_api.infrastructure.project_service import InfrastructureProjectService
 
-from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
-
 
 class ProjectService:
     def __init__(self, infra_service: InfrastructureProjectService) -> None:
@@ -32,16 +30,8 @@ class ProjectService:
             self.root_folder, project_id, project_metadata
         )
 
-    def update_project_config(
-        self, project_id: str, config: LearningCoordinatorConfigModel
-    ):
-        self.infra_service.update_project_config(self.root_folder, project_id, config)
-
     def get_all_projects(self):
         return self.infra_service.get_all_projects(self.root_folder)
-
-    def get_project_data(self, project_id: str):
-        return self.infra_service.get_project_data(self.root_folder, project_id)
 
     def get_project_metadata(self, project_id: str):
         return self.infra_service.get_project_metadata(self.root_folder, project_id)

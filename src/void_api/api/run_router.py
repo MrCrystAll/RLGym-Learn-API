@@ -1,6 +1,8 @@
-from typing import Annotated
+import json
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import JSONResponse
 
 from void_api.api.services import get_run_service
 from void_api.core.run_service import RunService
@@ -32,7 +34,55 @@ def get_all_runs(
         return Response(str(e), 404)
 
 
-@router.delete("/", operation_id="delete_run")
+@router.post("/{project_id}/{run_name}/data", operation_id="get_run_data")
+def get_run_data(
+    project_id: str,
+    run_name: str,
+    run_service: Annotated[RunService, Depends(get_run_service)],
+):
+    try:
+        return run_service.get_run_data(project_id, run_name)
+    except OSError as e:
+        return Response(content=str(e), status_code=404)
+    except ValueError as e:
+        return Response(content=str(e), status_code=417)
+
+
+@router.put("/{project_id}/{run_name}/config", operation_id="update_run_config")
+async def update_run_config(
+    project_id: str,
+    run_name: str,
+    request: Request,
+    run_service: Annotated[RunService, Depends(get_run_service)],
+):
+    raw = await request.body()
+    _raw_config = json.loads(raw)
+
+    try:
+        run_service.update_run_data(project_id, run_name, _raw_config)
+    except AssertionError as e:
+        return Response(str(e), status_code=400)
+
+
+@router.post("/{project_id}/{run_name}/metrics", include_in_schema=False)
+def update_metrics(
+    project_id: str,
+    run_name: str,
+    metrics: dict[str, Any],
+    run_service: Annotated[RunService, Depends(get_run_service)],
+):
+    return JSONResponse(
+        {
+            "reason": "TODO: Implement metrics",
+            "data": metrics,
+            "project_id": project_id,
+            "run_name": run_name,
+        },
+        status_code=501,
+    )
+
+
+@router.delete("", operation_id="delete_run")
 def delete_run(
     args: RunDeletionArgs, run_service: Annotated[RunService, Depends(get_run_service)]
 ) -> None:

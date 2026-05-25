@@ -205,5 +205,6 @@ pip-selfcheck.json
 .ionide
 
 client/
+temp/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,venv,visualstudiocode

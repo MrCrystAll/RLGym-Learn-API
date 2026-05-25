@@ -12,10 +12,10 @@ class FSSessionService(InfrastructureSessionService):
         _path = pathlib.Path(root_folder)
 
         # Create log structure
-        os.makedirs((_path / session.logs.stdout).parent)
+        os.makedirs(pathlib.Path(session.logs.stdout).parent)
 
-        (_path / session.logs.stdout).touch()
-        (_path / session.logs.stderr).touch()
+        pathlib.Path(session.logs.stdout).touch()
+        pathlib.Path(session.logs.stderr).touch()
 
         _session_path = (
             _path / session.project_id / "runs" / session.run_name / "sessions.json"
@@ -34,8 +34,6 @@ class FSSessionService(InfrastructureSessionService):
         )
 
         ta = TypeAdapter(list[Session])
-        
-        print((_path / "sessions.json").absolute())
 
         _pyd_sessions = ta.validate_json((_path / "sessions.json").read_text())
 
@@ -63,8 +61,9 @@ class FSSessionService(InfrastructureSessionService):
             f"Session {session_id} not found in run {run_name} of project {project_id}"
         )
 
-
-    def get_all_sessions(self, root_folder: str, project_id: str, run_name: str) -> list[Session]:
+    def get_all_sessions(
+        self, root_folder: str, project_id: str, run_name: str
+    ) -> list[Session]:
         _path = pathlib.Path(root_folder) / project_id / "runs" / run_name
 
         if not _path.exists():
@@ -77,8 +76,8 @@ class FSSessionService(InfrastructureSessionService):
             raise FileNotFoundError(
                 f"The sessions.json file doesn't exist in the run {run_name}"
             )
-            
+
         ta = TypeAdapter(list[Session])
         _pyd_sessions = ta.validate_json((_path / "sessions.json").read_text())
-        
+
         return _pyd_sessions

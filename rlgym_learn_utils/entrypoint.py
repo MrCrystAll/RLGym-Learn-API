@@ -1,13 +1,16 @@
+# Main entrypoint of a run
+
+import json
 import os
 import pathlib
 import sys
-
-from numpy import std
+import traceback
 
 # needed to prevent numpy from using a ton of memory in env processes and causing them to throttle each other
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
 
+# You can modify this function without any issue
 def build_rlgym_v2_env():
     import numpy as np
     from rlgym.api import RLGym
@@ -80,8 +83,22 @@ def build_rlgym_v2_env():
 
 
 if __name__ == "__main__":
+    # I HIGHLY DISCOURAGE you to modify this part as it may cause unexpected crashes / unplanned stuff
+    # Modify at your own risk
+    #
+    from argparse import ArgumentParser
     from typing import Tuple
 
+    parser = ArgumentParser()
+    parser.add_argument("--session", help="The ID of the session")
+    parser.add_argument("--run", help="The run of the session")
+    parser.add_argument("--project", help="The project of the run")
+    args = parser.parse_args()
+
+    from rlgym_learn import (
+        LearningCoordinator,
+    )
+    from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
     from rlgym_learn_algos.ppo import (
         BasicCritic,
         DiscreteFF,
@@ -91,11 +108,21 @@ if __name__ == "__main__":
         PPOMetricsLogger,
     )
 
-    from rlgym_learn import (
-        LearningCoordinator,
+    # from rlgym_learn_algos.util.checkpoint_saving.checkpoint_handler import (
+    #     CheckpointHandler,
+    # )
+    # from rlgym_learn_algos.util.checkpoint_saving.loading_strategy import (
+    #     LoadLatestCheckpoint,
+    # )
+    # from rlgym_learn_algos.util.checkpoint_saving.saving_strategy import (
+    #     KeepLastCheckpoints,
+    #     SaveTimestamps,
+    # )
+    from rlgym_learn_gui.agent_controller import (
+        GUIAgentController,
+        GUIAgentControllerConfig,
     )
-
-    from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+    from rlgym_learn_gui.metrics_logger import GUIMetricsLogger, GUIMetricsLoggerConfig
 
     # The obs_space_type and action_space_type are determined by your choice of ObsBuilder and ActionParser respectively.
     # The logic used here assumes you are using the types defined by the DefaultObs and LookupTableAction above.
@@ -113,26 +140,70 @@ if __name__ == "__main__":
         return BasicCritic(obs_space[1], (256, 256, 256), device)
 
     try:
-        _pyd_config = LearningCoordinatorConfigModel.model_validate_json(
-            pathlib.Path("config.json").read_text()
+        _json_config = json.loads(pathlib.Path("config.json").read_text())
+        _json_agent_controllers_config = _json_config["agent_controllers_config"]
+
+        _gui_metrics_logger_config = GUIMetricsLoggerConfig(
+            project_id=args.project,
+            run_name=args.run,
+            port=8000,
+            inner_metrics_logger_config=None,
+        )
+        _gui_agent_controller_config = GUIAgentControllerConfig(
+            session_id=args.session, port=8000, inner_agent_controller_config=None
+        )
+
+        agent_controllers = {
+            agent: GUIAgentController(
+                PPOAgentController(
+                    actor_factory=actor_factory,
+                    critic_factory=critic_factory,
+                    experience_buffer=NumpyExperienceBuffer(GAETrajectoryProcessor()),
+                    metrics_logger=GUIMetricsLogger(PPOMetricsLogger()),
+                    # checkpoint_handler=CheckpointHandler(
+                    #     load_strategy=LoadLatestCheckpoint(),
+                    #     save_strategy=KeepLastCheckpoints(SaveTimestamps()),
+                    # ),
+                    obs_standardizer=None,
+                )
+            )
+            for agent in _json_agent_controllers_config.keys()
+        }
+
+        for _agent_controller_id in _json_agent_controllers_config.keys():
+            try:
+                _gui_agent_controller_config.inner_agent_controller_config = (
+                    _json_config["agent_controllers_config"][_agent_controller_id]
+                )
+
+                _gui_metrics_logger_config.inner_metrics_logger_config = _json_config[
+                    "agent_controllers_config"
+                ][_agent_controller_id]["metrics_logger_config"]
+            except AttributeError:
+                pass
+            finally:
+                _json_config["agent_controllers_config"][_agent_controller_id] = (
+                    _gui_agent_controller_config.model_dump()
+                )
+
+                _json_config["agent_controllers_config"][_agent_controller_id][
+                    "inner_agent_controller_config"
+                ]["metrics_logger_config"] = _gui_metrics_logger_config.model_dump()
+
+        _config = LearningCoordinatorConfigModel.model_validate_json(
+            json.dumps(_json_config), context=agent_controllers
         )
 
         learning_coordinator = LearningCoordinator(
             build_rlgym_v2_env,
-            agent_controllers={
-                agent: PPOAgentController(
-                    actor_factory=actor_factory,
-                    critic_factory=critic_factory,
-                    experience_buffer=NumpyExperienceBuffer(GAETrajectoryProcessor()),
-                    metrics_logger=PPOMetricsLogger(),
-                    obs_standardizer=None,
-                )
-                for agent in _pyd_config.agent_controllers_config.keys()
-            },
-            config_location="config.json",
+            agent_controllers=agent_controllers,
+            config=_config,
         )
+
         learning_coordinator.start()
         print("Process finished.")
     except Exception as e:
-        print(e, file=sys.stderr, flush=True)
+        _lines = traceback.format_exception(e)
+        for _line in _lines:
+            print(_line, file=sys.stderr, flush=True)
         sys.exit(1)

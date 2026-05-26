@@ -46,7 +46,7 @@ jobs:
         run: |
           npx @openapitools/openapi-generator-cli generate \
             -i openapi.json \
-            -g typescript-fetch \
+            -g typescript-axios \
             -o src/client \
             -c typescript-axios-config.yaml
 

@@ -1,16 +1,19 @@
 import os
 import shutil
+import subprocess
+import sys
 
 if __name__ == "__main__":
     print("Deleting directory...")
     try:
-        shutil.rmtree("./client")
+        shutil.rmtree("./generated")
     except (FileNotFoundError, PermissionError):
         pass
     print("Generating")
+    subprocess.call([sys.executable, "scripts\\export_openapi.py"])
     os.system(
         "npx @openapitools/openapi-generator-cli generate -i \
-        http://localhost:8000/openapi.json -g typescript-axios -o client/ \
+        openapi.json -g typescript-axios -o generated/ \
         -c typescript-axios-config.yaml"
     )
     # print("Creating .tgz package")

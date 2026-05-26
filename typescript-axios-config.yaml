@@ -1,8 +1,12 @@
 npmName: "rlgym-learn-client"
+
 gitHost: "github.com"
 gitUserId: "MrCrystAll"
 gitRepoId: "RLGym-Learn-API"
+
 author: "MrCrystAll"
 licenseName: "MIT"
+
 withInterfaces: true
 supportsES6: true
+basePath: "http://localhost:8000"

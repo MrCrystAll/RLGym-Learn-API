@@ -1,11 +1,14 @@
 import os
 from datetime import datetime
 
-from void_api.core.project_service import ProjectService
-from void_api.core.run_service import RunService
-from void_api.desc.session import LogConfig, Session
-from void_api.infrastructure.session_handling import SessionHandler, start_entrypoint
-from void_api.infrastructure.session_service import InfrastructureSessionService
+from rlgym_learn_api.core.project_service import ProjectService
+from rlgym_learn_api.core.run_service import RunService
+from rlgym_learn_api.desc.session import LogConfig, Session
+from rlgym_learn_api.infrastructure.session_handling import (
+    SessionHandler,
+    start_entrypoint,
+)
+from rlgym_learn_api.infrastructure.session_service import InfrastructureSessionService
 
 
 class SessionService:

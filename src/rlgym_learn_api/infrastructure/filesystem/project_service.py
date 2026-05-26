@@ -5,13 +5,14 @@ import shutil
 import uuid
 
 from pydantic import ValidationError
-from void_api.desc.project import ProjectMetadata
-from void_api.desc.project_crud_schemas import (
+
+from rlgym_learn_api.desc.project import ProjectMetadata
+from rlgym_learn_api.desc.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
 )
-from void_api.infrastructure.project_fs import generate_project_directory
-from void_api.infrastructure.project_service import InfrastructureProjectService
+from rlgym_learn_api.infrastructure.project_fs import generate_project_directory
+from rlgym_learn_api.infrastructure.project_service import InfrastructureProjectService
 
 PROJECT_CONFIG_JSON_FILE = "project_config.json"
 

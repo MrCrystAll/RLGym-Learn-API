@@ -1,0 +1,51 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+
+name: Node.js Package
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+
+      - name: Export OpenAPI spec
+        run: python scripts/export_openapi.py
+
+      - name: Generate TypeScript client
+        run: |
+          npx @openapitools/openapi-generator-cli generate \
+            -i openapi.json \
+            -g typescript-fetch \
+            -o src/client \
+            --additional-properties=npmName=rlgym-learn-client,supportsES6=true,withInterfaces=true
+
+      - name: Sync version
+        run: |
+          VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('rlgym_learn_api'))")
+          npm version $VERSION --no-git-tag-version
+        working-directory: src/client
+
+      - name: Build
+        run: |
+          npm install
+          npm run build
+        working-directory: src/client
+
+      # 5. Publish
+      - name: Publish to npm
+        run: npm publish
+        working-directory: src/client

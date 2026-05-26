@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from void_api.desc.session import Session
+from rlgym_learn_api.desc.session import Session
 
 
 class InfrastructureSessionService(ABC):
@@ -17,7 +17,7 @@ class InfrastructureSessionService(ABC):
         self, root_folder: str, project_id: str, run_name: str, session_id: str
     ) -> Session:
         pass
-    
+
     @abstractmethod
     def get_all_sessions(
         self, root_folder: str, project_id: str, run_name: str

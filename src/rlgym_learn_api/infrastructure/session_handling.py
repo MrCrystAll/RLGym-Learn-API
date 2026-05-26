@@ -6,8 +6,8 @@ import threading
 from datetime import datetime
 from typing import IO, Callable
 
-from void_api.desc.project import ProjectMetadata
-from void_api.desc.session import Session
+from rlgym_learn_api.desc.project import ProjectMetadata
+from rlgym_learn_api.desc.session import Session
 
 
 def start_entrypoint(

@@ -3,10 +3,10 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Response
 from fastapi.responses import JSONResponse
 
-from void_api.api.services import get_session_service
-from void_api.core.session_service import SessionService
-from void_api.desc.session import Session
-from void_api.desc.session_crud_schemas import (
+from rlgym_learn_api.api.services import get_session_service
+from rlgym_learn_api.core.session_service import SessionService
+from rlgym_learn_api.desc.session import Session
+from rlgym_learn_api.desc.session_crud_schemas import (
     SessionGetAllArgs,
     SessionGetHealth,
     SessionSetSpacesArgs,

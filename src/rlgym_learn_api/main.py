@@ -1,15 +1,15 @@
 import os
-from posixpath import dirname
 import sys
+from posixpath import dirname
 
 from fastapi import FastAPI, Response
 from starlette.middleware.cors import CORSMiddleware
 
 sys.path.append(os.path.join(dirname(__file__), "src"))
 
-from void_api.api.project_router import router as project_router
-from void_api.api.run_router import router as run_router
-from void_api.api.session_router import router as session_router
+from rlgym_learn_api.api.project_router import router as project_router
+from rlgym_learn_api.api.run_router import router as run_router
+from rlgym_learn_api.api.session_router import router as session_router
 
 app = FastAPI()
 

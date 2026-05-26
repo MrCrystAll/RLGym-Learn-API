@@ -1,9 +1,9 @@
-from void_api.desc.project_crud_schemas import (
+from rlgym_learn_api.desc.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
     ProjectUpdateRoot,
 )
-from void_api.infrastructure.project_service import InfrastructureProjectService
+from rlgym_learn_api.infrastructure.project_service import InfrastructureProjectService
 
 
 class ProjectService:

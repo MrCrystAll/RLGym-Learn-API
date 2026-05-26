@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import JSONResponse
 from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel
 
-from void_api.api.services import get_run_service
-from void_api.core.run_service import RunService
-from void_api.desc.run import Run
-from void_api.desc.run_crud_schemas import RunCreationArgs, RunDeletionArgs
+from rlgym_learn_api.api.services import get_run_service
+from rlgym_learn_api.core.run_service import RunService
+from rlgym_learn_api.desc.run import Run
+from rlgym_learn_api.desc.run_crud_schemas import RunCreationArgs, RunDeletionArgs
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 

@@ -3,8 +3,8 @@ import pathlib
 
 from pydantic import TypeAdapter
 
-from void_api.desc.session import Session
-from void_api.infrastructure.session_service import InfrastructureSessionService
+from rlgym_learn_api.desc.session import Session
+from rlgym_learn_api.infrastructure.session_service import InfrastructureSessionService
 
 
 class FSSessionService(InfrastructureSessionService):

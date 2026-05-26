@@ -25,6 +25,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install wandb
       - run: pip install -e .
       - uses: actions/setup-node@v4
         with:

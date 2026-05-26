@@ -11,7 +11,7 @@ if __name__ == "__main__":
     os.system(
         "npx @openapitools/openapi-generator-cli generate -i \
         http://localhost:8000/openapi.json -g typescript-axios -o client/ \
-        --additional-properties=npmName=rlgym-learn-client,withInterfaces=true,supportsES6=true"
+        -c typescript-axios-config.yaml"
     )
-    print("Creating .tgz package")
-    os.system("cd client && npm i && npm pack")
+    # print("Creating .tgz package")
+    # os.system("cd client && npm i && npm pack")

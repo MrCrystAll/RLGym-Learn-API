@@ -5,7 +5,7 @@ if __name__ == "__main__":
     print("Deleting directory...")
     try:
         shutil.rmtree("./client")
-    except FileNotFoundError:
+    except (FileNotFoundError, PermissionError):
         pass
     print("Generating")
     os.system(

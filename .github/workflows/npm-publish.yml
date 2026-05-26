@@ -25,11 +25,13 @@ jobs:
             ${{ runner.os }}-pip-
 
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install git+https://github.com/MrCrystAll/rlgym-learn.git@GUI
+      - run: pip install git+https://github.com/MrCrystAll/rlgym-learn-algos.git@GUI
       - run: pip install wandb
       - run: pip install -e .
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org/
 
       - name: Export OpenAPI spec

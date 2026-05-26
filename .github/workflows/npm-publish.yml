@@ -61,6 +61,6 @@ jobs:
           npm run build
         working-directory: src/client
 
-      # - name: Publish to npm
-      #   run: npm publish
-      #   working-directory: src/client
+      - name: Publish to npm
+        run: npm publish
+        working-directory: src/client

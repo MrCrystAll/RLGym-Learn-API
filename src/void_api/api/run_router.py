@@ -3,6 +3,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import JSONResponse
+from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel
 
 from void_api.api.services import get_run_service
 from void_api.core.run_service import RunService
@@ -92,3 +93,17 @@ def delete_run(
         return Response(str(e), 404)  # Not found
     except OSError as e:
         return Response(str(e), 417)  # Invalid arguments
+
+
+@router.get("/{project_id}/{run_name}/default", operation_id="get_default_config")
+def get_default_config(
+    project_id: str,
+    run_name: str,
+    config_type: str,
+    run_service: Annotated[RunService, Depends(get_run_service)],
+) -> PPOAgentControllerConfigModel:
+    print(project_id, run_name, config_type)
+    try:
+        return run_service.get_default_config(project_id, run_name, config_type)
+    except ValueError as e:
+        return Response(str(e), 404)

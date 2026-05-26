@@ -1,5 +1,7 @@
 from typing import Any
 
+from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel
+
 from void_api.core.project_service import ProjectService
 from void_api.infrastructure.run_service import InfrastructureRunService
 
@@ -57,3 +59,11 @@ class RunService:
         return self.infra_service.get_run_data(
             self.project_service.root_folder, project_id, run_name
         )
+
+    def _get_ppo_default_config(self, run_name: str):
+        return PPOAgentControllerConfigModel(run_name=run_name)
+
+    def get_default_config(self, project_id: str, run_name: str, config_type: str):
+        if config_type == "ppo":
+            return self._get_ppo_default_config(run_name)
+        raise ValueError(f"Unknown default config: {config_type}")

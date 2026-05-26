@@ -15,13 +15,13 @@ jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
       - name: Cache pip dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
@@ -42,19 +42,18 @@ jobs:
       - name: Export OpenAPI spec
         run: python scripts/export_openapi.py
 
+      - name: Get API version
+        run: |
+          VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('rlgym_learn_api'))")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Generate TypeScript client
         run: |
           npx @openapitools/openapi-generator-cli generate \
             -i openapi.json \
             -g typescript-axios \
             -o src/client \
-            -c typescript-axios-config.yaml
-
-      - name: Sync version
-        run: |
-          VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('rlgym_learn_api'))")
-          npm version $VERSION --no-git-tag-version
-        working-directory: src/client
+            -c typescript-axios-config.yaml --additional-properties npmVersion=${{env.VERSION}}
 
       - name: Build
         run: |
@@ -62,6 +61,6 @@ jobs:
           npm run build
         working-directory: src/client
 
-      - name: Publish to npm
-        run: npm publish
-        working-directory: src/client
+      # - name: Publish to npm
+      #   run: npm publish
+      #   working-directory: src/client

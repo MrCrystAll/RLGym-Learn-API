@@ -102,7 +102,6 @@ def get_default_config(
     config_type: str,
     run_service: Annotated[RunService, Depends(get_run_service)],
 ) -> PPOAgentControllerConfigModel:
-    print(project_id, run_name, config_type)
     try:
         return run_service.get_default_config(project_id, run_name, config_type)
     except ValueError as e:

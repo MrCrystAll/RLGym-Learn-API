@@ -7,6 +7,7 @@ from rlgym.api import ActionSpaceType, ObsSpaceType
 class SessionStartArgs(BaseModel):
     run_name: str
     project_id: str
+    port: int
 
 
 class SessionGetAllArgs(BaseModel):

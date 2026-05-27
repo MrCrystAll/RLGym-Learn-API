@@ -38,7 +38,7 @@ class SessionService:
             # Passing, it means the run has been deleted when the session was running
             pass
 
-    def start_session(self, project_id: str, run_name: str) -> Session:
+    def start_session(self, project_id: str, run_name: str, port: int) -> Session:
         if not self.run_service.run_exists(project_id, run_name):
             raise ValueError(
                 f'Run "{run_name}" doesn\'t exist in project "{project_id}"'
@@ -79,6 +79,7 @@ class SessionService:
             self.project_service.root_folder,
             self.project_service.get_project_metadata(project_id),
             _session,
+            port,
             self._on_end_session,
         )
 

@@ -23,7 +23,7 @@ def start_new_session(
 ) -> Session:
 
     try:
-        return session_service.start_session(args.project_id, args.run_name)
+        return session_service.start_session(args.project_id, args.run_name, args.port)
     except ValueError as e:
         return Response(str(e), 404)
 

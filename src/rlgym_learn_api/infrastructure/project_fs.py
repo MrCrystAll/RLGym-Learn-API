@@ -8,10 +8,16 @@ from rlgym_learn.basic_config import BaseConfigModel, SerdeTypesModel
 from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from rlgym_learn.rlgym_learn import PyAnySerdeType
 
+from rlgym_learn_api.paths import get_root
+
+
+def _get_bundled_entrypoint() -> str:
+    return os.path.join(get_root(), "rlgym_learn_utils", "entrypoint.py")
+
 
 def generate_entrypoint(path: str | os.PathLike[str]):
     shutil.copy(
-        os.path.join("rlgym_learn_utils", "entrypoint.py"),
+        _get_bundled_entrypoint(),
         os.path.join(path, "main.py"),
     )
 

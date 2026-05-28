@@ -115,7 +115,6 @@ jobs:
           EOF
 
       - name: Patch pyproject.toml (toml-cli)
-        working-directory: ./Void_API
         run: |
           pip install toml-cli
           toml set --toml-file pyproject.toml project.version "${{ steps.convert.outputs.python-version }}"
@@ -132,7 +131,7 @@ jobs:
           echo "Pushing version bump to branch: $BRANCH"
 
           git checkout $BRANCH
-          git add package.json ./Void_API/pyproject.toml
+          git add pyproject.toml
           git commit -m "chore: bump version to ${{ github.ref_name }} [skip ci]"
           git push origin $BRANCH
 

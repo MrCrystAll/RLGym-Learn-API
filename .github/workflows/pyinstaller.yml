@@ -51,9 +51,6 @@ jobs:
 
       - name: Commit and push version bump
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
           # find which branch this tag points to
           BRANCH=$(git branch -r --contains ${{ github.ref_name }} \
             | grep -v HEAD \
@@ -90,48 +87,6 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
-
-      - name: Convert tag to Python version
-        id: convert
-        run: |
-          python3 << 'EOF'
-          import re, os
-          tag = os.environ["GITHUB_REF_NAME"]
-          raw = tag.lstrip("v")
-          py_map = {"alpha": "a", "beta": "b", "rc": "rc"}
-          m = re.match(r"^(\d+\.\d+\.\d+)(?:-([a-z]+)\.(\d+))?$", raw)
-          if not m:
-              raise ValueError(f"Tag '{tag}' does not match vX.Y.Z[-pre.N] format")
-          base, pre_name, pre_num = m.groups()
-          if pre_name:
-              py_pre = py_map.get(pre_name, pre_name)
-              python_version = f"{base}{py_pre}{pre_num}"
-          else:
-              python_version = base
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-              f.write(f"python-version={python_version}\n")
-          EOF
-
-      - name: Patch pyproject.toml (toml-cli)
-        run: |
-          pip install toml-cli
-          toml set --toml-path pyproject.toml project.version "${{ steps.convert.outputs.python-version }}"
-
-      - name: Commit and push version bump
-        run: |
-          # find which branch this tag points to
-          BRANCH=$(git branch -r --contains ${{ github.ref_name }} \
-            | grep -v HEAD \
-            | sed 's|origin/||' \
-            | tr -d ' ' \
-            | head -1)
-
-          echo "Pushing version bump to branch: $BRANCH"
-
-          git checkout $BRANCH
-          git add pyproject.toml
-          git commit -m "chore: bump version to ${{ github.ref_name }} [skip ci]"
-          git push origin $BRANCH
 
       - name: Install dependencies
         run: |

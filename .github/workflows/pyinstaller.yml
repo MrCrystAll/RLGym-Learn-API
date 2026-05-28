@@ -124,6 +124,9 @@ jobs:
     needs: build-api
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Download Windows build
         uses: actions/download-artifact@v8
         with:
@@ -135,9 +138,6 @@ jobs:
         with:
           name: api-linux
           path: ./release-files/
-
-      - name: Checkout code
-        uses: actions/checkout@v6
 
       - name: Extract release notes from CHANGELOG.md
         id: extract_release_notes

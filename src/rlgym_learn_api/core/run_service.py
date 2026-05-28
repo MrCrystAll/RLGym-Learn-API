@@ -2,8 +2,8 @@ from typing import Any
 
 from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel
 
-from void_api.core.project_service import ProjectService
-from void_api.infrastructure.run_service import InfrastructureRunService
+from rlgym_learn_api.core.project_service import ProjectService
+from rlgym_learn_api.infrastructure.run_service import InfrastructureRunService
 
 
 class RunService:

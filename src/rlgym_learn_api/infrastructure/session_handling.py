@@ -6,14 +6,15 @@ import threading
 from datetime import datetime
 from typing import IO, Callable
 
-from void_api.desc.project import ProjectMetadata
-from void_api.desc.session import Session
+from rlgym_learn_api.desc.project import ProjectMetadata
+from rlgym_learn_api.desc.session import Session
 
 
 def start_entrypoint(
     root_folder: str,
     project_metadata: ProjectMetadata,
     session: Session,
+    port: int,
     on_end_cb: Callable[[Session, int], None],
 ):
     _path = pathlib.Path(root_folder) / project_metadata.id / "runs" / session.run_name
@@ -30,6 +31,8 @@ def start_entrypoint(
             session.run_name,
             "--project",
             session.project_id,
+            "--port",
+            str(port),
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -106,7 +109,7 @@ class SessionHandler:
         if _session.stdin is None:
             raise OSError("The started session has no input descriptor")
 
-        _session.stdin.write(data + "\r\n")
+        _session.stdin.write(data)
         _session.stdin.flush()
 
     def save_and_stop(self, session_id: str):

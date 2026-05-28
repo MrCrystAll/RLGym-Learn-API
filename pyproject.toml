@@ -3,21 +3,26 @@ requires = ["setuptools>=64.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rlgym-learn-gui"
-version = "0.1.0"
-description = "Objects used to communication with RLGym Learn's GUI"
+name = "rlgym-learn-api"
+version = "0.1.4"
+description = "RLGym-Learn's API for the GUI"
 readme = "README.md"
 authors = [
     { name = "Mathieu Suchet", email = "msuchet63@gmail.com" }
 ]
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
-dependencies = ["rlgym-learn-algos", "requests"]
+requires-python = ">=3.12"
+dependencies = [
+    "rlgym-learn-algos",
+    "fastapi"
+]
 # Optional: define classifiers for PyPI
 classifiers = [
     "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["rlgym_learn_api*"]

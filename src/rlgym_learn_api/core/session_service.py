@@ -1,11 +1,14 @@
 import os
 from datetime import datetime
 
-from void_api.core.project_service import ProjectService
-from void_api.core.run_service import RunService
-from void_api.desc.session import LogConfig, Session
-from void_api.infrastructure.session_handling import SessionHandler, start_entrypoint
-from void_api.infrastructure.session_service import InfrastructureSessionService
+from rlgym_learn_api.core.project_service import ProjectService
+from rlgym_learn_api.core.run_service import RunService
+from rlgym_learn_api.desc.session import LogConfig, Session
+from rlgym_learn_api.infrastructure.session_handling import (
+    SessionHandler,
+    start_entrypoint,
+)
+from rlgym_learn_api.infrastructure.session_service import InfrastructureSessionService
 
 
 class SessionService:
@@ -35,7 +38,7 @@ class SessionService:
             # Passing, it means the run has been deleted when the session was running
             pass
 
-    def start_session(self, project_id: str, run_name: str) -> Session:
+    def start_session(self, project_id: str, run_name: str, port: int) -> Session:
         if not self.run_service.run_exists(project_id, run_name):
             raise ValueError(
                 f'Run "{run_name}" doesn\'t exist in project "{project_id}"'
@@ -76,6 +79,7 @@ class SessionService:
             self.project_service.root_folder,
             self.project_service.get_project_metadata(project_id),
             _session,
+            port,
             self._on_end_session,
         )
 

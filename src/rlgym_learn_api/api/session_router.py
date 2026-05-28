@@ -3,10 +3,10 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Response
 from fastapi.responses import JSONResponse
 
-from void_api.api.services import get_session_service
-from void_api.core.session_service import SessionService
-from void_api.desc.session import Session
-from void_api.desc.session_crud_schemas import (
+from rlgym_learn_api.api.services import get_session_service
+from rlgym_learn_api.core.session_service import SessionService
+from rlgym_learn_api.desc.session import Session
+from rlgym_learn_api.desc.session_crud_schemas import (
     SessionGetAllArgs,
     SessionGetHealth,
     SessionSetSpacesArgs,
@@ -23,7 +23,7 @@ def start_new_session(
 ) -> Session:
 
     try:
-        return session_service.start_session(args.project_id, args.run_name)
+        return session_service.start_session(args.project_id, args.run_name, args.port)
     except ValueError as e:
         return Response(str(e), 404)
 

@@ -2,10 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response
 
-from void_api.api.services import get_project_service
-from void_api.core.project_service import ProjectService
-from void_api.desc.project import ProjectMetadata
-from void_api.desc.project_crud_schemas import (
+from rlgym_learn_api.api.services import get_project_service
+from rlgym_learn_api.core.project_service import ProjectService
+from rlgym_learn_api.desc.project import ProjectMetadata
+from rlgym_learn_api.desc.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
     ProjectUpdateRoot,

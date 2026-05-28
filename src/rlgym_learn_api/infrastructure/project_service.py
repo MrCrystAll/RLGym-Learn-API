@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from void_api.desc.project import ProjectMetadata
-from void_api.desc.project_crud_schemas import (
+from rlgym_learn_api.desc.project import ProjectMetadata
+from rlgym_learn_api.desc.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
 )

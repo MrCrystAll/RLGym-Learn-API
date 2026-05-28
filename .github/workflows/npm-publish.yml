@@ -1,0 +1,86 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+
+name: Node.js Package
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Convert tag to npm version
+        id: convert
+        run: |
+          python3 << 'EOF'
+          import re, os
+          tag = os.environ["GITHUB_REF_NAME"]
+          raw = tag.lstrip("v")
+          m = re.match(r"^(\d+\.\d+\.\d+)(?:-([a-z]+)\.(\d+))?$", raw)
+          if not m:
+              raise ValueError(f"Tag '{tag}' does not match vX.Y.Z[-pre.N] format")
+          base, pre_name, pre_num = m.groups()
+          if pre_name:
+              npm_version    = f"{base}-{pre_name}.{pre_num}"
+          else:
+              npm_version    = base
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"npm-version={npm_version}\n")
+          EOF
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install git+https://github.com/MrCrystAll/rlgym-learn.git@GUI
+      - run: pip install git+https://github.com/MrCrystAll/rlgym-learn-algos.git@GUI
+      - run: pip install wandb uvicorn
+      - run: pip install -e .
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          package-manager-cache: false # never use caching in release builds
+
+      - name: Export OpenAPI spec
+        run: python scripts/export_openapi.py
+
+      - name: Generate TypeScript client
+        run: |
+          npx @openapitools/openapi-generator-cli generate \
+            -i openapi.json \
+            -g typescript-axios \
+            -o src/client \
+            -c typescript-axios-config.yaml --additional-properties npmVersion=${{ steps.convert.outputs.npm-version }}
+
+      - name: Build
+        run: |
+          npm install
+          npm run build
+        working-directory: src/client
+
+      - name: Publish to npm
+        run: |
+          NPM_TAG=$(python3 -c "
+          import re, os
+          m = re.search(r'-(alpha|beta|rc)\.', os.environ['GITHUB_REF_NAME'])
+          print(m.group(1) if m else 'latest')
+          ")
+          npm publish --tag $NPM_TAG
+        working-directory: src/client

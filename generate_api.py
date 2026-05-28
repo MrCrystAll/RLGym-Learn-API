@@ -1,5 +1,7 @@
 import os
 import shutil
+import subprocess
+import sys
 
 if __name__ == "__main__":
     print("Deleting directory...")
@@ -8,10 +10,11 @@ if __name__ == "__main__":
     except (FileNotFoundError, PermissionError):
         pass
     print("Generating")
+    subprocess.call([sys.executable, "scripts\\export_openapi.py"])
     os.system(
         "npx @openapitools/openapi-generator-cli generate -i \
-        http://localhost:8000/openapi.json -g typescript-axios -o client/ \
-        --additional-properties=npmName=rlgym-learn-client,withInterfaces=true,supportsES6=true"
+        openapi.json -g typescript-axios -o client/ \
+        -c typescript-axios-config.yaml"
     )
-    print("Creating .tgz package")
-    os.system("cd client && npm i && npm pack")
+    # print("Creating .tgz package")
+    # os.system("cd client && npm i && npm pack")

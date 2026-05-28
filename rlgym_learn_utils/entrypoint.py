@@ -93,7 +93,10 @@ if __name__ == "__main__":
     parser.add_argument("--session", help="The ID of the session")
     parser.add_argument("--run", help="The run of the session")
     parser.add_argument("--project", help="The project of the run")
+    parser.add_argument("--port", help="The port of the API")
     args = parser.parse_args()
+
+    _port = int(args.port)
 
     from rlgym_learn import (
         LearningCoordinator,
@@ -146,11 +149,11 @@ if __name__ == "__main__":
         _gui_metrics_logger_config = GUIMetricsLoggerConfig(
             project_id=args.project,
             run_name=args.run,
-            port=8000,
+            port=_port,
             inner_metrics_logger_config=None,
         )
         _gui_agent_controller_config = GUIAgentControllerConfig(
-            session_id=args.session, port=8000, inner_agent_controller_config=None
+            session_id=args.session, port=_port, inner_agent_controller_config=None
         )
 
         agent_controllers = {

@@ -1,10 +1,9 @@
-from void_api.core.project_service import ProjectService
-from void_api.core.run_service import RunService
-from void_api.core.session_service import SessionService
-from void_api.infrastructure.filesystem.project_service import FSProjectService
-from void_api.infrastructure.filesystem.run_service import FSRunService
-from void_api.infrastructure.filesystem.session_service import FSSessionService
-
+from rlgym_learn_api.core.project_service import ProjectService
+from rlgym_learn_api.core.run_service import RunService
+from rlgym_learn_api.core.session_service import SessionService
+from rlgym_learn_api.infrastructure.filesystem.project_service import FSProjectService
+from rlgym_learn_api.infrastructure.filesystem.run_service import FSRunService
+from rlgym_learn_api.infrastructure.filesystem.session_service import FSSessionService
 
 _fs_project_service = FSProjectService()
 _fs_run_service = FSRunService()

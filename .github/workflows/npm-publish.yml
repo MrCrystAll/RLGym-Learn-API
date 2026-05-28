@@ -20,6 +20,25 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Convert tag to npm version
+        id: convert
+        run: |
+          python3 << 'EOF'
+          import re, os
+          tag = os.environ["GITHUB_REF_NAME"]
+          raw = tag.lstrip("v")
+          m = re.match(r"^(\d+\.\d+\.\d+)(?:-([a-z]+)\.(\d+))?$", raw)
+          if not m:
+              raise ValueError(f"Tag '{tag}' does not match vX.Y.Z[-pre.N] format")
+          base, pre_name, pre_num = m.groups()
+          if pre_name:
+              npm_version    = f"{base}-{pre_name}.{pre_num}"
+          else:
+              npm_version    = base
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"npm-version={npm_version}\n")
+          EOF
+
       - name: Cache pip dependencies
         uses: actions/cache@v5
         with:
@@ -31,7 +50,7 @@ jobs:
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: pip install git+https://github.com/MrCrystAll/rlgym-learn.git@GUI
       - run: pip install git+https://github.com/MrCrystAll/rlgym-learn-algos.git@GUI
-      - run: pip install wandb
+      - run: pip install wandb uvicorn
       - run: pip install -e .
       - uses: actions/setup-node@v6
         with:
@@ -42,18 +61,13 @@ jobs:
       - name: Export OpenAPI spec
         run: python scripts/export_openapi.py
 
-      - name: Get API version
-        run: |
-          VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('rlgym_learn_api'))")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Generate TypeScript client
         run: |
           npx @openapitools/openapi-generator-cli generate \
             -i openapi.json \
             -g typescript-axios \
             -o src/client \
-            -c typescript-axios-config.yaml --additional-properties npmVersion=${{env.VERSION}}
+            -c typescript-axios-config.yaml --additional-properties npmVersion=${{ steps.convert.outputs.npm-version }}
 
       - name: Build
         run: |

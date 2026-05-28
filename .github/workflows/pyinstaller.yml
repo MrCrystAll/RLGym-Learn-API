@@ -8,6 +8,68 @@ permissions:
   contents: write
 
 jobs:
+  set-version:
+    name: Set Version from Tag
+    runs-on: ubuntu-latest
+
+    outputs:
+      python-version: ${{ steps.convert.outputs.python-version }}
+      npm-version: ${{ steps.convert.outputs.npm-version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # full history needed to detect the branch behind the tag
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Convert tag to Python and npm versions
+        id: convert
+        run: |
+          python3 << 'EOF'
+          import re, os
+          tag = os.environ["GITHUB_REF_NAME"]
+          raw = tag.lstrip("v")
+          py_map = {"alpha": "a", "beta": "b", "rc": "rc"}
+          m = re.match(r"^(\d+\.\d+\.\d+)(?:-([a-z]+)\.(\d+))?$", raw)
+          if not m:
+              raise ValueError(f"Tag '{tag}' does not match vX.Y.Z[-pre.N] format")
+          base, pre_name, pre_num = m.groups()
+          if pre_name:
+              py_pre = py_map.get(pre_name, pre_name)
+              python_version = f"{base}{py_pre}{pre_num}"
+          else:
+              python_version = base
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"python-version={python_version}\n")
+          EOF
+
+      - name: Patch pyproject.toml
+        run: |
+          pip install toml-cli
+          toml set --toml-file pyproject.toml project.version "${{ steps.convert.outputs.python-version }}"
+
+      - name: Commit and push version bump
+        run: |
+          # find which branch this tag points to
+          BRANCH=$(git branch -r --contains ${{ github.ref_name }} \
+            | grep -v HEAD \
+            | sed 's|origin/||' \
+            | tr -d ' ' \
+            | head -1)
+
+          echo "Pushing version bump to branch: $BRANCH"
+
+          git checkout $BRANCH
+          git add pyproject.toml
+          git commit -m "chore: bump version to ${{ github.ref_name }} [skip ci]"
+          git push origin $BRANCH
+
   build-api:
     name: Build API (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -31,13 +93,56 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
+      - name: Convert tag to Python version
+        id: convert
+        run: |
+          python3 << 'EOF'
+          import re, os
+          tag = os.environ["GITHUB_REF_NAME"]
+          raw = tag.lstrip("v")
+          py_map = {"alpha": "a", "beta": "b", "rc": "rc"}
+          m = re.match(r"^(\d+\.\d+\.\d+)(?:-([a-z]+)\.(\d+))?$", raw)
+          if not m:
+              raise ValueError(f"Tag '{tag}' does not match vX.Y.Z[-pre.N] format")
+          base, pre_name, pre_num = m.groups()
+          if pre_name:
+              py_pre = py_map.get(pre_name, pre_name)
+              python_version = f"{base}{py_pre}{pre_num}"
+          else:
+              python_version = base
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"python-version={python_version}\n")
+          EOF
+
+      - name: Patch pyproject.toml (toml-cli)
+        working-directory: ./Void_API
+        run: |
+          pip install toml-cli
+          toml set --toml-file pyproject.toml project.version "${{ steps.convert.outputs.python-version }}"
+
+      - name: Commit and push version bump
+        run: |
+          # find which branch this tag points to
+          BRANCH=$(git branch -r --contains ${{ github.ref_name }} \
+            | grep -v HEAD \
+            | sed 's|origin/||' \
+            | tr -d ' ' \
+            | head -1)
+
+          echo "Pushing version bump to branch: $BRANCH"
+
+          git checkout $BRANCH
+          git add package.json ./Void_API/pyproject.toml
+          git commit -m "chore: bump version to ${{ github.ref_name }} [skip ci]"
+          git push origin $BRANCH
+
       - name: Install dependencies
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install git+https://github.com/MrCrystAll/rlgym-learn.git@GUI
           pip install git+https://github.com/MrCrystAll/rlgym-learn-algos.git@GUI
           pip install -e .
-          pip install wandb uvicorn
+          pip install wandb uvicorn pyinstaller
 
       - name: Build with PyInstaller
         run: pyinstaller main.spec

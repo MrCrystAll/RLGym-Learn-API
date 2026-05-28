@@ -76,5 +76,11 @@ jobs:
         working-directory: src/client
 
       - name: Publish to npm
-        run: npm publish
+        run: |
+          NPM_TAG=$(python3 -c "
+          import re, os
+          m = re.search(r'-(alpha|beta|rc)\.', os.environ['GITHUB_REF_NAME'])
+          print(m.group(1) if m else 'latest')
+          ")
+          npm publish --tag $NPM_TAG
         working-directory: src/client

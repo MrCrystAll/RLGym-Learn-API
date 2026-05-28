@@ -117,7 +117,7 @@ jobs:
       - name: Patch pyproject.toml (toml-cli)
         run: |
           pip install toml-cli
-          toml set --toml-file pyproject.toml project.version "${{ steps.convert.outputs.python-version }}"
+          toml set --toml-path pyproject.toml project.version "${{ steps.convert.outputs.python-version }}"
 
       - name: Commit and push version bump
         run: |

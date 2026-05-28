@@ -78,10 +78,10 @@ jobs:
         include:
           - os: windows-latest
             artifact-name: api-windows
-            output-name: main.exe
+            output-name: RLGym_Learn_API.exe
           - os: ubuntu-latest
             artifact-name: api-linux
-            output-name: main
+            output-name: RLGym_Learn_API
 
     steps:
       - name: Checkout code
@@ -133,7 +133,7 @@ jobs:
         id: extract_release_notes
         uses: ffurrer2/extract-release-notes@v3
         with:
-          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') || contains(github.ref_name, '-rc') }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -141,7 +141,7 @@ jobs:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           draft: false
-          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') || contains(github.ref_name, '-rc') }}
           files: ./release-files/*
           body: ${{ steps.extract_release_notes.outputs.release_notes }}
         env:

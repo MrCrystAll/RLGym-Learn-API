@@ -23,11 +23,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0 # full history needed to detect the branch behind the tag
 
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Convert tag to Python and npm versions
         id: convert
         run: |
@@ -56,6 +51,9 @@ jobs:
 
       - name: Commit and push version bump
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
           # find which branch this tag points to
           BRANCH=$(git branch -r --contains ${{ github.ref_name }} \
             | grep -v HEAD \

@@ -1,0 +1,86 @@
+name: Pyinstaller
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-api:
+    name: Build API (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact-name: api-windows
+            output-name: main.exe
+          - os: ubuntu-latest
+            artifact-name: api-linux
+            output-name: main
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install git+https://github.com/MrCrystAll/rlgym-learn.git@GUI
+          pip install git+https://github.com/MrCrystAll/rlgym-learn-algos.git@GUI
+          pip install -e .
+          pip install wandb uvicorn
+
+      - name: Build with PyInstaller
+        run: pyinstaller main.spec
+
+      - name: Upload API binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ./dist/${{ matrix.output-name }}
+          retention-days: 1 # only needed during this workflow run
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-api
+
+    steps:
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: api-windows
+          path: ./release-files/
+
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: api-linux
+          path: ./release-files/
+
+      - name: Extract release notes from CHANGELOG.md
+        id: extract_release_notes
+        uses: ffurrer2/extract-release-notes@v3
+        with:
+          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          files: ./release-files/*
+          body: ${{ steps.extract_release_notes.outputs.release_notes }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

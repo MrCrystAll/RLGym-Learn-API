@@ -109,7 +109,7 @@ class SessionHandler:
         if _session.stdin is None:
             raise OSError("The started session has no input descriptor")
 
-        _session.stdin.write(data + "\r\n")
+        _session.stdin.write(data)
         _session.stdin.flush()
 
     def save_and_stop(self, session_id: str):

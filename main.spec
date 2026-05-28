@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ["src\\rlgym_learn_api\\main.py"],
+    ["src/rlgym_learn_api/main.py"],
     pathex=[],
     binaries=[],
     datas=[("rlgym_learn_utils/*.py", "rlgym_learn_utils")],
@@ -26,7 +26,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,
+    upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,

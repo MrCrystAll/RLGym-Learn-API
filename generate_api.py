@@ -16,5 +16,5 @@ if __name__ == "__main__":
         openapi.json -g typescript-axios -o client/ \
         -c typescript-axios-config.yaml"
     )
-    # print("Creating .tgz package")
-    # os.system("cd client && npm i && npm pack")
+    print("Creating .tgz package")
+    os.system("cd client && npm i && npm pack")

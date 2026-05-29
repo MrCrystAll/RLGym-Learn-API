@@ -6,8 +6,8 @@ import uuid
 
 from pydantic import ValidationError
 
-from rlgym_learn_api.desc.project import ProjectMetadata
-from rlgym_learn_api.desc.project_crud_schemas import (
+from rlgym_learn_api.desc.project.project import ProjectMetadata
+from rlgym_learn_api.desc.project.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
 )
@@ -22,6 +22,8 @@ class FSProjectService(InfrastructureProjectService):
 
         if project_args.interpreter is None:
             raise ValueError("Validation failed for project creation")
+        if not os.path.exists(path):
+            raise OSError(f"Folder path {path} doesn't exist")
 
         _id = str(uuid.uuid4())
 
@@ -45,7 +47,7 @@ class FSProjectService(InfrastructureProjectService):
     ):
         _path = pathlib.Path(os.path.join(path, project_id))
         if not os.path.exists(_path):
-            raise OSError(f"Cannot access folder {_path}")
+            raise OSError("The specified project doesn't exist")
 
         _pyd_config = ProjectMetadata.model_validate_json(
             (_path / PROJECT_CONFIG_JSON_FILE).read_text()
@@ -70,6 +72,9 @@ class FSProjectService(InfrastructureProjectService):
 
     def get_all_projects(self, path: str) -> list[ProjectMetadata]:
         _projects = []
+
+        if not os.path.exists(path):
+            raise OSError(f'Folder path "{path}" doesn\'t exist')
 
         for _dir in os.listdir(path):
             _path = pathlib.Path(path) / _dir

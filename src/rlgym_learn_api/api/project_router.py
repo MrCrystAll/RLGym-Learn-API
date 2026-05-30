@@ -56,7 +56,7 @@ def create_project(
     try:
         return project_service.create_project(args)
     except ProjectCreationFailed as e:
-        return JSONResponse(e.to_dict(), status_code=e.error_code)
+        return JSONResponse(e.to_dict().model_dump(), status_code=e.error_code)
 
 
 @router.delete(
@@ -74,7 +74,7 @@ def delete_project(
     try:
         project_service.delete_project(project_id)
     except ProjectNotFoundError as e:
-        return JSONResponse(e.to_dict(), status_code=e.error_code)
+        return JSONResponse(e.to_dict().model_dump(), status_code=e.error_code)
 
 
 @router.put(
@@ -93,7 +93,7 @@ def update_project_metadata(
     try:
         project_service.update_project_metadata(project_id, project_metadata)
     except ProjectNotFoundError as e:
-        return JSONResponse(e.to_dict(), status_code=e.error_code)
+        return JSONResponse(e.to_dict().model_dump(), status_code=e.error_code)
 
 
 @router.get(
@@ -110,7 +110,7 @@ def get_all_projects(
     try:
         return project_service.get_all_projects()
     except ProjectRootFolderNotFound as e:
-        return JSONResponse(e.to_dict(), status_code=e.error_code)
+        return JSONResponse(e.to_dict().model_dump(), status_code=e.error_code)
 
 
 @router.get(
@@ -125,4 +125,4 @@ def get_project_metadata(
     try:
         return project_service.get_project_metadata(project_id)
     except (ProjectMalformed, ProjectNotFoundError) as e:
-        return JSONResponse(e.to_dict(), e.error_code)
+        return JSONResponse(e.to_dict().model_dump(), e.error_code)

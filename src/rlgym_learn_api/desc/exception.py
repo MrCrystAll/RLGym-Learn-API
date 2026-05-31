@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Generic, TypeVar
 
 from pydantic import BaseModel
@@ -7,7 +8,9 @@ class RLGymLearnApiExceptionModel(BaseModel):
     message: str
 
 
-ExceptionModelTypeVar = TypeVar("ExceptionTypeVar", bound=RLGymLearnApiExceptionModel)
+ExceptionModelTypeVar = TypeVar(
+    "ExceptionModelTypeVar", bound=RLGymLearnApiExceptionModel
+)
 
 
 class RLGymLearnApiException(Exception, Generic[ExceptionModelTypeVar]):
@@ -16,5 +19,6 @@ class RLGymLearnApiException(Exception, Generic[ExceptionModelTypeVar]):
         self.message = message
         self.error_code = error_code
 
+    @abstractmethod
     def to_dict(self) -> ExceptionModelTypeVar:
         pass

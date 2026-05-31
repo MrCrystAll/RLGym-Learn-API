@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from rlgym_learn_api.desc.run import Run
+from rlgym_learn_api.desc.run.run import Run
 
 
 class InfrastructureRunService(ABC):

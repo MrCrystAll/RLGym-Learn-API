@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
-from rlgym_learn_api.desc.run import Run
+from rlgym_learn_api.desc.run.run import Run
 from rlgym_learn_api.infrastructure.project_fs import (
     generate_config,
     generate_entrypoint,
@@ -95,16 +95,13 @@ class FSRunService(InfrastructureRunService):
     def get_run_data(self, path: str, project_id: str, run_name: str) -> dict[str, Any]:
         _path = self._get_run_root_path(path, project_id, run_name)
 
-        if not _path.is_dir():
-            raise OSError("The specified run is not a folder")
-
         if not self.run_exists(path, project_id, run_name):
             raise ValueError(
                 f"The run {run_name} doesn't exists in project {project_id}"
             )
 
         if not (_path / "src" / "config.json").exists():
-            raise ValueError(
+            raise FileNotFoundError(
                 "The project doesn't have any configuration, this means it is probably corrupted"
             )
 
@@ -121,6 +118,7 @@ class FSRunService(InfrastructureRunService):
             pathlib.Path(self._get_src_path(path, project_id, run_name)) / "config.json"
         )
 
-        assert _path.exists(), "The config does not exist for this project"
+        if not _path.exists():
+            raise FileNotFoundError("The config does not exist for this project")
 
         _path.write_text(json.dumps(raw_config))

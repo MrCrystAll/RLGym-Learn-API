@@ -143,7 +143,6 @@ def get_default_config(
     run_name: str,
     config_type: str,
     run_service: Annotated[RunService, Depends(get_run_service)],
-    
 ):
     try:
         return run_service.get_default_config(project_id, run_name, config_type)

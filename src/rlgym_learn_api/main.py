@@ -9,11 +9,12 @@ from starlette.middleware.cors import CORSMiddleware
 
 sys.path.append(os.path.join(dirname(__file__), "src"))
 
+import rlgym_learn_api
 from rlgym_learn_api.api.project_router import router as project_router
 from rlgym_learn_api.api.run_router import router as run_router
 from rlgym_learn_api.api.session_router import router as session_router
 
-app = FastAPI()
+app = FastAPI(version=rlgym_learn_api.__version__)
 
 app.add_middleware(
     CORSMiddleware,

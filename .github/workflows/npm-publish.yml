@@ -30,7 +30,7 @@ jobs:
           m = re.match(r"^(\d+\.\d+\.\d+)$", raw)
           if not m:
               raise ValueError(f"Tag '{tag}' does not match vX.Y.Z format")
-          base = m.groups()
+          base = m.groups()[0]
           npm_version = base
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"npm-version={npm_version}\n")

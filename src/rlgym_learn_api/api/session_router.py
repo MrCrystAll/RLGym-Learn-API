@@ -40,7 +40,7 @@ def start_new_session(
 @router.post(
     "/{session_id}/stop",
     operation_id="stop_session",
-    responses={200: {"model": None}, 404: {"model": RLGymLearnApiExceptionModel}},
+    responses={200: {"model": int}, 404: {"model": RLGymLearnApiExceptionModel}},
 )
 def stop_session(
     session_id: str,
@@ -48,8 +48,8 @@ def stop_session(
 ):
     try:
         return session_service.stop_session(session_id)
-    except SessionNotFoundError as e:
-        return Response(e.to_dict().model_dump(), e.error_code)
+    except RLGymLearnApiException as e:
+        return JSONResponse(e.to_dict().model_dump(), e.error_code)
 
 
 @router.post(

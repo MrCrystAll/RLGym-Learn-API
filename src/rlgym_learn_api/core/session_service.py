@@ -121,5 +121,11 @@ class SessionService:
             return self.infra_service.get_session(
                 self.project_service.root_folder, project_id, run_name, session_id
             )
+        except NotADirectoryError as e:
+            raise ProjectMalformed(description=str(e), project_id=project_id) from e
+        except FileNotFoundError as e:
+            raise RunConfigMissingError(description=str(e), run_name=run_name) from e
+        except OSError as e:
+            raise RunNotFoundError(description=str(e), run_name=run_name) from e
         except ValueError as e:
-            raise SessionNotFoundError(session_id=session_id, description=str(e))
+            raise SessionNotFoundError(session_id=session_id, description=str(e)) from e

@@ -121,11 +121,14 @@ if __name__ == "__main__":
     #     KeepLastCheckpoints,
     #     SaveTimestamps,
     # )
-    from rlgym_learn_gui.agent_controller import (
+    from rlgym_learn_api_tools.agent_controller import (
         GUIAgentController,
         GUIAgentControllerConfig,
     )
-    from rlgym_learn_gui.metrics_logger import GUIMetricsLogger, GUIMetricsLoggerConfig
+    from rlgym_learn_api_tools.metrics_logger import (
+        GUIMetricsLogger,
+        GUIMetricsLoggerConfig,
+    )
 
     # The obs_space_type and action_space_type are determined by your choice of ObsBuilder and ActionParser respectively.
     # The logic used here assumes you are using the types defined by the DefaultObs and LookupTableAction above.

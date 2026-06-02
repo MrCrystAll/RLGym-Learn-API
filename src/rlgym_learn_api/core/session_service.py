@@ -3,7 +3,10 @@ from datetime import datetime
 
 from rlgym_learn_api.core.project_service import ProjectService
 from rlgym_learn_api.core.run_service import RunService
-from rlgym_learn_api.desc.session import LogConfig, Session
+from rlgym_learn_api.desc.project.exceptions import ProjectMalformed
+from rlgym_learn_api.desc.run.exceptions import RunConfigMissingError, RunNotFoundError
+from rlgym_learn_api.desc.session.exceptions import SessionNotFoundError
+from rlgym_learn_api.desc.session.session import LogConfig, Session
 from rlgym_learn_api.infrastructure.session_handling import (
     SessionHandler,
     start_entrypoint,
@@ -40,8 +43,8 @@ class SessionService:
 
     def start_session(self, project_id: str, run_name: str, port: int) -> Session:
         if not self.run_service.run_exists(project_id, run_name):
-            raise ValueError(
-                f'Run "{run_name}" doesn\'t exist in project "{project_id}"'
+            raise RunNotFoundError(
+                f'Run "{run_name}" doesn\'t exist in project "{project_id}"', run_name
             )
 
         _sid = str(int(datetime.now().timestamp()))
@@ -89,15 +92,24 @@ class SessionService:
 
     def stop_session(self, session_id: str):
         if not self.session_handler.session_exists(session_id):
-            raise ValueError(f"Session {session_id} ended or doesn't exist")
+            raise SessionNotFoundError(
+                session_id, f"Session {session_id} ended or doesn't exist"
+            )
 
         self.session_handler.save_and_stop(session_id)
         return self.session_handler.wait_for_session(session_id)
 
     def get_all_sessions(self, project_id: str, run_name: str) -> list[Session]:
-        return self.infra_service.get_all_sessions(
-            self.project_service.root_folder, project_id, run_name
-        )
+        try:
+            return self.infra_service.get_all_sessions(
+                self.project_service.root_folder, project_id, run_name
+            )
+        except NotADirectoryError as e:
+            raise ProjectMalformed(description=str(e), project_id=project_id) from e
+        except FileNotFoundError as e:
+            raise RunConfigMissingError(description=str(e), run_name=run_name)
+        except OSError as e:
+            raise RunNotFoundError(description=str(e), run_name=run_name) from e
 
     def get_session_health(
         self, project_id: str, run_name: str, session_id: str
@@ -105,6 +117,15 @@ class SessionService:
         return self._get_session(project_id, run_name, session_id).status
 
     def _get_session(self, project_id: str, run_name: str, session_id: str) -> Session:
-        return self.infra_service.get_session(
-            self.project_service.root_folder, project_id, run_name, session_id
-        )
+        try:
+            return self.infra_service.get_session(
+                self.project_service.root_folder, project_id, run_name, session_id
+            )
+        except NotADirectoryError as e:
+            raise ProjectMalformed(description=str(e), project_id=project_id) from e
+        except FileNotFoundError as e:
+            raise RunConfigMissingError(description=str(e), run_name=run_name) from e
+        except OSError as e:
+            raise RunNotFoundError(description=str(e), run_name=run_name) from e
+        except ValueError as e:
+            raise SessionNotFoundError(session_id=session_id, description=str(e)) from e

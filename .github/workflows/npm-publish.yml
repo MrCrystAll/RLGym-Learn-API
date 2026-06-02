@@ -5,7 +5,7 @@ name: Node.js Package
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v[1-9]+.[0-9]+.[0-9]"]
 
 permissions:
   id-token: write # Required for OIDC
@@ -27,14 +27,11 @@ jobs:
           import re, os
           tag = os.environ["GITHUB_REF_NAME"]
           raw = tag.lstrip("v")
-          m = re.match(r"^(\d+\.\d+\.\d+)(?:-([a-z]+)\.(\d+))?$", raw)
+          m = re.match(r"^(\d+\.\d+\.\d+)$", raw)
           if not m:
-              raise ValueError(f"Tag '{tag}' does not match vX.Y.Z[-pre.N] format")
-          base, pre_name, pre_num = m.groups()
-          if pre_name:
-              npm_version    = f"{base}-{pre_name}.{pre_num}"
-          else:
-              npm_version    = base
+              raise ValueError(f"Tag '{tag}' does not match vX.Y.Z format")
+          base, _, _ = m.groups()
+          npm_version = base
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"npm-version={npm_version}\n")
           EOF
@@ -77,10 +74,5 @@ jobs:
 
       - name: Publish to npm
         run: |
-          NPM_TAG=$(python3 -c "
-          import re, os
-          m = re.search(r'-(alpha|beta|rc)\.', os.environ['GITHUB_REF_NAME'])
-          print(m.group(1) if m else 'latest')
-          ")
-          npm publish --tag $NPM_TAG
+          npm publish --tag latest
         working-directory: src/client

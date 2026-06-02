@@ -1,7 +1,4 @@
-from rlgym_learn_api.desc.exception import (
-    RLGymLearnApiException,
-    RLGymLearnApiExceptionModel,
-)
+from rlgym_learn_api.desc.exception import RLGymLearnApiException
 
 
 class ProjectNotFoundError(RLGymLearnApiException):
@@ -16,7 +13,7 @@ class ProjectCreationFailed(RLGymLearnApiException):
 
     def __init__(self, description: str, project_name: str, error_code: int) -> None:
         super().__init__(
-            message=f'Project "{project_name}" creation failed',
+            title=f'Project "{project_name}" creation failed',
             description=description,
             error_code=error_code,
         )
@@ -28,7 +25,7 @@ class ProjectMalformed(RLGymLearnApiException):
     def __init__(self, description: str, project_id: str) -> None:
         super().__init__(
             error_code=417,
-            message=f"Project {project_id} is malformed",
+            title=f"Project {project_id} is malformed",
             description=description,
         )
 
@@ -36,7 +33,7 @@ class ProjectMalformed(RLGymLearnApiException):
 class ProjectRootFolderNotFound(RLGymLearnApiException):
     def __init__(self, description: str, path: str) -> None:
         super().__init__(
-            message=f'Project root folder (Evaluated at "{path}") not found',
+            title=f'Project root folder (Evaluated at "{path}") not found',
             description=description,
             error_code=404,
         )

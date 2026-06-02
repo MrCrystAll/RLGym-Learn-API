@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import IO, Callable
 
 from rlgym_learn_api.desc.project.project import ProjectMetadata
-from rlgym_learn_api.desc.session import Session
+from rlgym_learn_api.desc.session.session import Session
 
 
 def start_entrypoint(

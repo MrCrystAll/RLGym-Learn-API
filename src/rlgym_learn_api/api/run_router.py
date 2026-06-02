@@ -1,19 +1,15 @@
 import json
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel
 
 from rlgym_learn_api.api.services import get_run_service
 from rlgym_learn_api.core.run_service import RunService
-from rlgym_learn_api.desc.exception import RLGymLearnApiException
-from rlgym_learn_api.desc.project.exceptions import ProjectNotFoundErrorModel
-from rlgym_learn_api.desc.run.exceptions import (
-    RunAlreadyExistsErrorModel,
-    RunConfigMissingErrorModel,
-    RunNotFoundErrorModel,
-    UnknownConfigTypeModel,
+from rlgym_learn_api.desc.exception import (
+    RLGymLearnApiException,
+    RLGymLearnApiExceptionModel,
 )
 from rlgym_learn_api.desc.run.run import Run
 from rlgym_learn_api.desc.run.run_crud_schemas import RunCreationArgs, RunDeletionArgs
@@ -26,8 +22,8 @@ router = APIRouter(prefix="/runs", tags=["runs"])
     operation_id="create_run",
     responses={
         200: {"model": None},
-        404: {"model": ProjectNotFoundErrorModel},
-        409: {"model": RunAlreadyExistsErrorModel},
+        404: {"model": RLGymLearnApiExceptionModel},
+        409: {"model": RLGymLearnApiExceptionModel},
     },
 )
 def create_run(
@@ -42,7 +38,7 @@ def create_run(
 @router.get(
     "/all",
     operation_id="get_all_runs",
-    responses={200: {"model": list[Run]}, 404: {"model": ProjectNotFoundErrorModel}},
+    responses={200: {"model": list[Run]}, 404: {"model": RLGymLearnApiExceptionModel}},
 )
 def get_all_runs(
     project_id: str, run_service: Annotated[RunService, Depends(get_run_service)]
@@ -60,8 +56,8 @@ def get_all_runs(
         200: {
             "model": None
         },  # Technically LearningCoordinatorConfigModel, but it's broken because of SerdesTypesModel
-        404: {"model": RunNotFoundErrorModel},
-        417: {"model": RunConfigMissingErrorModel},
+        404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
     },
 )
 def get_run_data(
@@ -80,7 +76,8 @@ def get_run_data(
     operation_id="update_run_config",
     responses={
         200: {"model": None},
-        417: {"model": RunConfigMissingErrorModel},
+        404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
     },
 )
 async def update_run_config(
@@ -119,7 +116,7 @@ def update_metrics(
 @router.delete(
     "",
     operation_id="delete_run",
-    responses={200: {"model": None}, 404: {"model": ProjectNotFoundErrorModel}},
+    responses={200: {"model": None}, 404: {"model": RLGymLearnApiExceptionModel}},
 )
 def delete_run(
     args: RunDeletionArgs, run_service: Annotated[RunService, Depends(get_run_service)]
@@ -135,7 +132,7 @@ def delete_run(
     operation_id="get_default_config",
     responses={
         200: {"model": PPOAgentControllerConfigModel},
-        417: {"model": UnknownConfigTypeModel},
+        417: {"model": RLGymLearnApiExceptionModel},
     },
 )
 def get_default_config(

@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 
 class RLGymLearnApiExceptionModel(BaseModel):
-    message: str
+    title: str
+    description: str
 
 
 ExceptionModelTypeVar = TypeVar(
@@ -14,11 +15,13 @@ ExceptionModelTypeVar = TypeVar(
 
 
 class RLGymLearnApiException(Exception, Generic[ExceptionModelTypeVar]):
-    def __init__(self, message: str, error_code: int) -> None:
-        super().__init__(message, error_code)
-        self.message = message
+    def __init__(self, title: str, description: str, error_code: int) -> None:
+        super().__init__(title, description, error_code)
+        self.title = title
+        self.description = description
         self.error_code = error_code
 
-    @abstractmethod
     def to_dict(self) -> ExceptionModelTypeVar:
-        pass
+        return RLGymLearnApiExceptionModel(
+            title=self.title, description=self.description
+        )

@@ -5,15 +5,12 @@ from fastapi.responses import JSONResponse
 
 from rlgym_learn_api.api.services import get_project_service
 from rlgym_learn_api.core.project_service import ProjectService
+from rlgym_learn_api.desc.exception import RLGymLearnApiExceptionModel
 from rlgym_learn_api.desc.project.exceptions import (
     ProjectCreationFailed,
-    ProjectCreationFailedModel,
     ProjectMalformed,
-    ProjectMalformedModel,
     ProjectNotFoundError,
-    ProjectNotFoundErrorModel,
     ProjectRootFolderNotFound,
-    ProjectRootFolderNotFoundModel,
 )
 from rlgym_learn_api.desc.project.project import ProjectMetadata
 from rlgym_learn_api.desc.project.project_crud_schemas import (
@@ -45,8 +42,8 @@ def get_root(
     operation_id="create_project",
     responses={
         200: {"model": str},
-        404: {"model": ProjectCreationFailedModel},
-        417: {"model": ProjectCreationFailedModel},
+        404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
     },
 )
 def create_project(
@@ -64,7 +61,7 @@ def create_project(
     operation_id="delete_project",
     responses={
         200: {"model": None},
-        404: {"model": ProjectNotFoundErrorModel},
+        404: {"model": RLGymLearnApiExceptionModel},
     },
 )
 def delete_project(
@@ -82,7 +79,7 @@ def delete_project(
     operation_id="update_project_metadata",
     responses={
         200: {"model": None},
-        404: {"model": ProjectNotFoundErrorModel},
+        404: {"model": RLGymLearnApiExceptionModel},
     },
 )
 def update_project_metadata(
@@ -101,7 +98,7 @@ def update_project_metadata(
     operation_id="get_all_projects",
     responses={
         200: {"model": list[ProjectMetadata]},
-        404: {"model": ProjectRootFolderNotFoundModel},
+        404: {"model": RLGymLearnApiExceptionModel},
     },
 )
 def get_all_projects(
@@ -116,7 +113,11 @@ def get_all_projects(
 @router.get(
     "/{project_id}/meta",
     operation_id="get_project_metadata",
-    response_model=ProjectMetadata | ProjectMalformedModel | ProjectNotFoundErrorModel,
+    responses={
+        200: {"model": ProjectMetadata},
+        404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
+    },
 )
 def get_project_metadata(
     project_id: str,

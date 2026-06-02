@@ -39,7 +39,7 @@ class RunService:
                 self.project_service.root_folder, project_id, run_name
             )
         except FileExistsError as e:
-            raise RunAlreadyExistsError(run_name) from e
+            raise RunAlreadyExistsError(str(e), run_name) from e
 
     def delete_run(self, project_id: str, run_name: str):
         self._check_project_exists(project_id)
@@ -48,9 +48,7 @@ class RunService:
                 self.project_service.root_folder, project_id, run_name
             )
         except ValueError as e:
-            raise ProjectNotFoundError(
-                project_id=project_id, inner_message=str(e)
-            ) from e
+            raise RunNotFoundError(str(e), run_name) from e
 
     def get_all_runs(self, project_id: str):
         self._check_project_exists(project_id)
@@ -65,7 +63,7 @@ class RunService:
                 self.project_service.root_folder, project_id, run_name, raw_config
             )
         except FileNotFoundError as e:
-            raise RunConfigMissingError(run_name=run_name) from e
+            raise RunConfigMissingError(str(e), run_name=run_name) from e
 
     def get_run_data(self, project_id: str, run_name: str):
         self._check_project_exists(project_id=project_id)
@@ -74,9 +72,9 @@ class RunService:
                 self.project_service.root_folder, project_id, run_name
             )
         except ValueError as e:
-            raise RunNotFoundError(run_name=run_name) from e
+            raise RunNotFoundError(description=str(e), run_name=run_name) from e
         except FileNotFoundError as e:
-            raise RunConfigMissingError(run_name=run_name) from e
+            raise RunConfigMissingError(str(e), run_name=run_name) from e
 
     def _get_ppo_default_config(self, run_name: str):
         return PPOAgentControllerConfigModel(run_name=run_name)
@@ -84,4 +82,6 @@ class RunService:
     def get_default_config(self, project_id: str, run_name: str, config_type: str):
         if config_type == "ppo":
             return self._get_ppo_default_config(run_name)
-        raise UnknownConfigType(config_type)
+        raise UnknownConfigType(
+            f'Configuration type "{config_type}" doesn\'t exist', config_type
+        )

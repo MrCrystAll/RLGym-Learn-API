@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from rlgym_learn_api.desc.session import Session
+from rlgym_learn_api.desc.session.session import Session
 
 
 class InfrastructureSessionService(ABC):

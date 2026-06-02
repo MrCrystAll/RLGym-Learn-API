@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rlgym-learn-api"
-version = "0.1.5-dev.6"
+version = "0.1.5-dev.7"
 description = "RLGym-Learn's API for the GUI"
 readme = "README.md"
 authors = [
@@ -28,7 +28,7 @@ where = ["src"]
 include = ["rlgym_learn_api*"]
 
 [tool.bumpversion]
-current_version = "0.1.5-dev.6"
+current_version = "0.1.5-dev.7"
 parse = """(?x)
     (?P<major>0|[1-9]\\d*)\\.
     (?P<minor>0|[1-9]\\d*)\\.

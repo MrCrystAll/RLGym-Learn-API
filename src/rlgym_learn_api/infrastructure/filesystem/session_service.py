@@ -3,7 +3,7 @@ import pathlib
 
 from pydantic import TypeAdapter
 
-from rlgym_learn_api.desc.session import Session
+from rlgym_learn_api.desc.session.session import Session
 from rlgym_learn_api.infrastructure.session_service import InfrastructureSessionService
 
 
@@ -67,14 +67,14 @@ class FSSessionService(InfrastructureSessionService):
         _path = pathlib.Path(root_folder) / project_id / "runs" / run_name
 
         if not _path.exists():
-            raise FileNotFoundError(f"The path {_path.absolute()} doesn't exist")
+            raise OSError(f"The path {_path.absolute()} doesn't exist")
 
         if not _path.is_dir():
             raise NotADirectoryError(f"The path {_path.absolute()} is not a directory")
 
         if not (_path / "sessions.json").exists():
             raise FileNotFoundError(
-                f"The sessions.json file doesn't exist in the run {run_name}"
+                f"The sessions.json file doesn't exist in the run {run_name} folder"
             )
 
         ta = TypeAdapter(list[Session])

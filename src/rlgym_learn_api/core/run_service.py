@@ -22,7 +22,9 @@ class RunService:
 
     def _check_project_exists(self, project_id: str):
         if not self.project_service.project_exists(project_id):
-            raise ProjectNotFoundError(project_id)
+            raise ProjectNotFoundError(
+                f"Project {project_id} doesn't exist", project_id
+            )
 
     def run_exists(self, project_id: str, run_name: str) -> bool:
         self._check_project_exists(project_id)

@@ -1,0 +1,20 @@
+Start training session
+Stop training session
+
+PPO Specifics:
+- Buffer explorator
+
+Metric logger:
+- Configurable graphs
+- Iteration reports ? (non graphable stuff, maybe gradients ?) <- Configurable per algorithm
+
+GUI Objects:
+- GUI Learning coordinator ? (To keep track of the state of the learning process)
+- GUI Communicator: Basically a wrapper that sends stuff to the API (metrics, state update, whatever)
+- GUI Agent controller: For various controller related stuff
+
+Checkpoint comparison:
+- Eval games between 2 checkpoints
+- Debugging:
+	- Compare actor/critic
+	- Situational comparison (state set in a given spot and compare deterministic versions)

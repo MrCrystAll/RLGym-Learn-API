@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from rlgym_learn_api.api.services import get_session_service
@@ -9,7 +9,6 @@ from rlgym_learn_api.desc.exception import (
     RLGymLearnApiException,
     RLGymLearnApiExceptionModel,
 )
-from rlgym_learn_api.desc.session.exceptions import SessionNotFoundError
 from rlgym_learn_api.desc.session.session import Session
 from rlgym_learn_api.desc.session.session_crud_schemas import (
     SessionGetAllArgs,

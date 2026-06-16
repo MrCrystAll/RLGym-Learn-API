@@ -28,24 +28,20 @@ class ProjectService:
             return self.infra_service.create_project(self.root_folder, project_args)
         except ValueError as e:
             raise ProjectCreationFailed(
+                description=str(e),
+                project_name=project_args.name,
                 error_code=417,  # Malformed
-                inner_exception=e,
-                name=project_args.name,
             ) from e
         except OSError as e:
             raise ProjectCreationFailed(
-                error_code=404,  # Not found
-                inner_exception=e,
-                name=project_args.name,
+                description=str(e), project_name=project_args.name, error_code=404
             ) from e
 
     def delete_project(self, project_id: str):
         try:
             self.infra_service.delete_project(self.root_folder, project_id)
         except OSError as e:
-            raise ProjectNotFoundError(
-                project_id=project_id, inner_message=str(e)
-            ) from e
+            raise ProjectNotFoundError(description=str(e), project_id=project_id) from e
 
     def update_project_metadata(
         self, project_id: str, project_metadata: ProjectUpdateMetadata
@@ -55,25 +51,23 @@ class ProjectService:
                 self.root_folder, project_id, project_metadata
             )
         except OSError as e:
-            raise ProjectNotFoundError(
-                project_id=project_id, inner_message=str(e)
-            ) from e
+            raise ProjectNotFoundError(project_id=project_id, description=str(e)) from e
 
     def get_all_projects(self):
         try:
             return self.infra_service.get_all_projects(self.root_folder)
         except OSError as e:
-            raise ProjectRootFolderNotFound(self.root_folder) from e
+            raise ProjectRootFolderNotFound(
+                description=f"Path {self.root_folder} not found", path=self.root_folder
+            ) from e
 
     def get_project_metadata(self, project_id: str):
         try:
             return self.infra_service.get_project_metadata(self.root_folder, project_id)
         except OSError as e:
-            raise ProjectNotFoundError(
-                project_id=project_id, inner_message=str(e)
-            ) from e
+            raise ProjectNotFoundError(project_id=project_id, description=str(e)) from e
         except ValueError as e:
-            raise ProjectMalformed(project_id=project_id, inner_message=str(e)) from e
+            raise ProjectMalformed(project_id=project_id, description=str(e)) from e
 
     def project_exists(self, project_id: str) -> bool:
         return self.infra_service.project_exists(self.root_folder, project_id)

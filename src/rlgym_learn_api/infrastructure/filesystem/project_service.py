@@ -6,6 +6,7 @@ import uuid
 
 from pydantic import ValidationError
 
+from rlgym_learn_api import __version__
 from rlgym_learn_api.desc.project.project import ProjectMetadata
 from rlgym_learn_api.desc.project.project_crud_schemas import (
     ProjectCreationArgs,
@@ -32,7 +33,10 @@ class FSProjectService(InfrastructureProjectService):
 
         (_folder_path / PROJECT_CONFIG_JSON_FILE).write_text(
             ProjectMetadata(
-                name=project_args.name, id=_id, interpreter=project_args.interpreter
+                name=project_args.name,
+                id=_id,
+                interpreter=project_args.interpreter,
+                created_at_version=__version__,
             ).model_dump_json()
         )
 
@@ -91,6 +95,7 @@ class FSProjectService(InfrastructureProjectService):
                     ProjectMetadata.model_validate_json(_config_file.read_text())
                 )
             except ValidationError:
+                # Pass because we just ignore the project if invalid (for now)
                 pass
 
         return _projects

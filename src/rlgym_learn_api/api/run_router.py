@@ -3,6 +3,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
+from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel
 
 from rlgym_learn_api.api.services import get_run_service
@@ -53,9 +54,7 @@ def get_all_runs(
     "/{project_id}/{run_name}/data",
     operation_id="get_run_data",
     responses={
-        200: {
-            "model": None
-        },  # Technically LearningCoordinatorConfigModel, but it's broken because of SerdesTypesModel
+        200: {"model": LearningCoordinatorConfigModel},
         404: {"model": RLGymLearnApiExceptionModel},
         417: {"model": RLGymLearnApiExceptionModel},
     },
@@ -83,14 +82,12 @@ def get_run_data(
 async def update_run_config(
     project_id: str,
     run_name: str,
-    request: Request,
+    config: LearningCoordinatorConfigModel,
     run_service: Annotated[RunService, Depends(get_run_service)],
 ):
-    raw = await request.body()
-    _raw_config = json.loads(raw)
 
     try:
-        run_service.update_run_data(project_id, run_name, _raw_config)
+        run_service.update_run_data(project_id, run_name, config)
     except RLGymLearnApiException as e:
         return JSONResponse(e.to_dict().model_dump(), status_code=e.error_code)
 

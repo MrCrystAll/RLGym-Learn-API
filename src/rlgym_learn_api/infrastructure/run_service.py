@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
+
 from rlgym_learn_api.desc.run.run import Run
 
 
@@ -31,6 +33,6 @@ class InfrastructureRunService(ABC):
         path: str,
         project_id: str,
         run_name: str,
-        raw_config: dict[str, Any],
+        config: LearningCoordinatorConfigModel,
     ):
         pass

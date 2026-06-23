@@ -5,6 +5,7 @@ import shutil
 from typing import Any
 
 from pydantic import TypeAdapter
+from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 
 from rlgym_learn_api.desc.run.run import Run
 from rlgym_learn_api.infrastructure.project_fs import (
@@ -112,7 +113,7 @@ class FSRunService(InfrastructureRunService):
         path: str,
         project_id: str,
         run_name: str,
-        raw_config: dict[str, Any],
+        config: LearningCoordinatorConfigModel,
     ):
         _path = (
             pathlib.Path(self._get_src_path(path, project_id, run_name)) / "config.json"
@@ -121,4 +122,4 @@ class FSRunService(InfrastructureRunService):
         if not _path.exists():
             raise FileNotFoundError("The config does not exist for this project")
 
-        _path.write_text(json.dumps(raw_config))
+        _path.write_text(config.model_dump_json())

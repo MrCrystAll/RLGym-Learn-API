@@ -1,6 +1,7 @@
 from rlgym_learn_api.core.project_service import ProjectService
 from rlgym_learn_api.core.run_service import RunService
 from rlgym_learn_api.core.session_service import SessionService
+from rlgym_learn_api.core.venv_manager_service import VenvManagerService
 from rlgym_learn_api.infrastructure.filesystem.project_service import FSProjectService
 from rlgym_learn_api.infrastructure.filesystem.run_service import FSRunService
 from rlgym_learn_api.infrastructure.filesystem.session_service import FSSessionService
@@ -12,6 +13,7 @@ _fs_session_service = FSSessionService()
 _project_service = ProjectService(_fs_project_service)
 _run_service = RunService(_project_service, _fs_run_service)
 _session_service = SessionService(_project_service, _run_service, _fs_session_service)
+_venv_manager_service = VenvManagerService(_project_service)
 
 
 def get_project_service() -> ProjectService:
@@ -24,3 +26,7 @@ def get_run_service() -> RunService:
 
 def get_session_service() -> SessionService:
     return _session_service
+
+
+def get_venv_manager_service() -> VenvManagerService:
+    return _venv_manager_service

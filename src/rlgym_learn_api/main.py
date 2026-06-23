@@ -13,6 +13,7 @@ import rlgym_learn_api
 from rlgym_learn_api.api.project_router import router as project_router
 from rlgym_learn_api.api.run_router import router as run_router
 from rlgym_learn_api.api.session_router import router as session_router
+from rlgym_learn_api.api.venv_manager_router import router as venv_manager_router
 
 app = FastAPI(version=rlgym_learn_api.__version__)
 
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(project_router)
 app.include_router(run_router)
 app.include_router(session_router)
+app.include_router(venv_manager_router)
 
 
 @app.get("/")

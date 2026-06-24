@@ -1,3 +1,5 @@
+import os
+
 from pydantic import BaseModel
 
 
@@ -15,4 +17,4 @@ class ProjectUpdateRoot(BaseModel):
 
 class ProjectUpdateMetadata(BaseModel):
     name: str | None = None
-    interpreter: str | None = None
+    interpreter: str | os.PathLike[str] | None = None

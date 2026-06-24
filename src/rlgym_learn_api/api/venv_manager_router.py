@@ -10,7 +10,10 @@ from rlgym_learn_api.desc.exception import (
     RLGymLearnApiException,
     RLGymLearnApiExceptionModel,
 )
-from rlgym_learn_api.desc.venv_manager.crud_operations import VenvCreationArgs
+from rlgym_learn_api.desc.venv_manager.crud_operations import (
+    VenvCreationArgs,
+    VenvInstallArgs,
+)
 
 router = APIRouter(prefix="/venv", tags=["venv"])
 
@@ -56,5 +59,30 @@ def delete_venv(
 ):
     try:
         venv_manager_service.delete_venv(args)
+    except RLGymLearnApiException as e:
+        return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
+
+
+@router.post(
+    "/install",
+    responses={
+        200: {"model": str},
+        404: {"model": RLGymLearnApiExceptionModel},
+        409: {"model": RLGymLearnApiExceptionModel},
+        500: {"model": RLGymLearnApiExceptionModel},
+    },
+    operation_id="install_package",
+)
+def install_package(
+    args: VenvInstallArgs,
+    venv_manager_service: Annotated[
+        VenvManagerService, Depends(get_venv_manager_service)
+    ],
+):
+    try:
+        venv_manager_service.install(
+            args.project_id, args.package_name, *args.extra_args
+        )
+        return f"The package {args.package_name} has been successfully installed."
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)

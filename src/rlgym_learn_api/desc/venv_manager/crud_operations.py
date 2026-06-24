@@ -1,7 +1,7 @@
 import os
 from enum import StrEnum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class VenvRLGymPreset(StrEnum):
@@ -23,6 +23,12 @@ class VenvCreationArgs(BaseModel):
     project_id: str
     python_executable: str | os.PathLike[str]
     preset: VenvPreset | None = None
+
+
+class VenvInstallArgs(BaseModel):
+    project_id: str
+    package_name: str
+    extra_args: list[str] = Field(default_factory=list)
 
 
 def _rlgym_dependencies(preset: VenvRLGymPreset) -> list[str]:

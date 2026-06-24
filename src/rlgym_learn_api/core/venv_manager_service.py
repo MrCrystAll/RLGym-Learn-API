@@ -11,13 +11,17 @@ from rlgym_learn_venv_manager.api.virtual_environment import (
 )
 
 from rlgym_learn_api.core.project_service import ProjectService
+from rlgym_learn_api.desc.project.project_crud_schemas import ProjectUpdateMetadata
 from rlgym_learn_api.desc.venv_manager.crud_operations import (
     VenvPreset,
     get_preset_dependencies,
 )
 from rlgym_learn_api.desc.venv_manager.exceptions import (
+    PackageExists,
+    VenvCommandFailed,
     VenvCreationFailed,
     VenvDeletionFailed,
+    VenvDoesntExist,
 )
 
 
@@ -49,6 +53,12 @@ class VenvManagerService:
 
         try:
             _venv = _venv_factory.create()
+            self._project_service.update_project_metadata(
+                project_id=project_id,
+                project_metadata=ProjectUpdateMetadata(
+                    interpreter=_venv.config.python_executable
+                ),
+            )
         except ValueError as e:
             raise VenvCreationFailed(description=str(e), error_code=500)
         return _venv.config
@@ -61,3 +71,34 @@ class VenvManagerService:
             _venv.delete()
         except OSError as e:
             raise VenvDeletionFailed(str(e), 500)
+
+    def _assert_venv_exists(self, python_executable: str | os.PathLike[str]):
+        if not os.path.exists(python_executable):
+            raise VenvDoesntExist(
+                f"Virtual environment not found at path {python_executable}"
+            )
+
+    def install(
+        self,
+        project_id: str,
+        package_name: str,
+        *extra_args: str,
+    ):
+        _project_metadata = self._project_service.get_project_metadata(project_id)
+        self._assert_venv_exists(_project_metadata.interpreter)
+
+        _venv = VirtualEnvironment()
+        _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
+        _venv.load(_venv_config)
+
+        if package_name in _venv.pip.list().keys():
+            raise PackageExists(f"The package {package_name} already exists.")
+
+        try:
+            _venv.install_package(package_name, *extra_args)
+        except ValueError as e:
+            raise VenvCommandFailed(
+                title="Package install failed unexpectedly",
+                description=str(e),
+                error_code=500,
+            )

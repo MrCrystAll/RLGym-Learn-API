@@ -31,6 +31,11 @@ class VenvInstallArgs(BaseModel):
     extra_args: list[str] = Field(default_factory=list)
 
 
+class VenvUpdateArgs(BaseModel):
+    project_id: str
+    package_name: str
+
+
 def _rlgym_dependencies(preset: VenvRLGymPreset) -> list[str]:
     match preset:
         case VenvRLGymPreset.API:

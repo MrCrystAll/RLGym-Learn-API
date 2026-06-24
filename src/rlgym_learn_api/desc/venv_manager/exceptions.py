@@ -34,3 +34,12 @@ class VenvCommandFailed(RLGymLearnApiException):
 
     def __init__(self, title: str, description: str, error_code: int) -> None:
         super().__init__(title, description, error_code)
+
+
+class ProjectInterpreterNotConfigured(RLGymLearnApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            title="Project interpreter not configured",
+            description="The interpreter for this project is None, please configure it.",
+            error_code=417,
+        )

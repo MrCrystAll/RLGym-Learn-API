@@ -13,6 +13,7 @@ from rlgym_learn_api.desc.exception import (
 from rlgym_learn_api.desc.venv_manager.crud_operations import (
     VenvCreationArgs,
     VenvInstallArgs,
+    VenvUpdateArgs,
 )
 
 router = APIRouter(prefix="/venv", tags=["venv"])
@@ -45,20 +46,21 @@ def create_venv(
 @router.delete(
     "",
     responses={
-        200: {"model": None},
+        200: {"model": str},
         404: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="delete_venv",
 )
 def delete_venv(
-    args: VenvConfig,
+    project_id: str,
     venv_manager_service: Annotated[
         VenvManagerService, Depends(get_venv_manager_service)
     ],
 ):
     try:
-        venv_manager_service.delete_venv(args)
+        venv_manager_service.delete_venv(project_id)
+        return f"The virtual environment for the project {project_id} has been successfully deleted."
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
 
@@ -88,21 +90,44 @@ def install_package(
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
 
 
-@router.post(
+@router.get(
     "/package_update",
     responses={
         200: {"model": dict[str, str]},
+        404: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="get_updatable_packages",
 )
 def get_updatable_packages(
-    args: VenvConfig,
+    project_id: str,
     venv_manager_service: Annotated[
         VenvManagerService, Depends(get_venv_manager_service)
     ],
 ):
     try:
-        return venv_manager_service.get_updatable_packages(args.python_executable)
+        return venv_manager_service.get_updatable_packages(project_id)
+    except RLGymLearnApiException as e:
+        return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
+
+
+@router.post(
+    "/update",
+    responses={
+        200: {"model": str},
+        404: {"model": RLGymLearnApiExceptionModel},
+        500: {"model": RLGymLearnApiExceptionModel},
+    },
+    operation_id="update_package",
+)
+def update_package(
+    args: VenvUpdateArgs,
+    venv_manager_service: Annotated[
+        VenvManagerService, Depends(get_venv_manager_service)
+    ],
+):
+    try:
+        venv_manager_service.update_package(args.project_id, args.package_name)
+        return f"Package {args.package_name} has been updated successfully."
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)

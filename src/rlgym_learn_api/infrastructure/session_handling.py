@@ -17,6 +17,9 @@ def start_entrypoint(
     port: int,
     on_end_cb: Callable[[Session, int], None],
 ):
+    if project_metadata.interpreter is None:
+        raise ValueError("Project interpreter is not set, can't start a session.")
+
     _path = pathlib.Path(root_folder) / project_metadata.id / "runs" / session.run_name
 
     _entrypoint = _path / "src" / "main.py"

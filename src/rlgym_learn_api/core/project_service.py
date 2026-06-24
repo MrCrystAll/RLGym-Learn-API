@@ -1,3 +1,5 @@
+import os
+
 from rlgym_learn_api.desc.project.exceptions import (
     ProjectCreationFailed,
     ProjectMalformed,
@@ -49,6 +51,16 @@ class ProjectService:
         try:
             self.infra_service.update_project_metadata(
                 self.root_folder, project_id, project_metadata
+            )
+        except OSError as e:
+            raise ProjectNotFoundError(project_id=project_id, description=str(e)) from e
+
+    def update_interpreter(
+        self, project_id: str, interpreter: str | os.PathLike[str] | None
+    ):
+        try:
+            self.infra_service.update_project_interpreter(
+                self.root_folder, project_id, interpreter
             )
         except OSError as e:
             raise ProjectNotFoundError(project_id=project_id, description=str(e)) from e

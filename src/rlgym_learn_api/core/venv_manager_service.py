@@ -18,6 +18,7 @@ from rlgym_learn_api.desc.venv_manager.crud_operations import (
 )
 from rlgym_learn_api.desc.venv_manager.exceptions import (
     PackageExists,
+    ProjectInterpreterNotConfigured,
     VenvCommandFailed,
     VenvCreationFailed,
     VenvDeletionFailed,
@@ -63,12 +64,22 @@ class VenvManagerService:
             raise VenvCreationFailed(description=str(e), error_code=500)
         return _venv.config
 
-    def delete_venv(self, venv_config: VenvConfig):
+    def delete_venv(self, project_id: str):
+        _project_metadata = self._project_service.get_project_metadata(project_id)
+        if _project_metadata.interpreter is None:
+            raise ProjectInterpreterNotConfigured()
+        self._assert_venv_exists(_project_metadata.interpreter)
+
         _venv = VirtualEnvironment()
-        _venv.load(venv_config)
+        _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
+        _venv.load(_venv_config)
 
         try:
             _venv.delete()
+            self._project_service.update_project_metadata(
+                project_id=project_id,
+                project_metadata=ProjectUpdateMetadata(interpreter=None),
+            )
         except OSError as e:
             raise VenvDeletionFailed(str(e), 500)
 
@@ -85,6 +96,9 @@ class VenvManagerService:
         *extra_args: str,
     ):
         _project_metadata = self._project_service.get_project_metadata(project_id)
+
+        if _project_metadata.interpreter is None:
+            raise ProjectInterpreterNotConfigured()
         self._assert_venv_exists(_project_metadata.interpreter)
 
         _venv = VirtualEnvironment()
@@ -103,11 +117,14 @@ class VenvManagerService:
                 error_code=500,
             )
 
-    def get_updatable_packages(
-        self, python_executable: str | os.PathLike[str]
-    ) -> dict[str, str]:
+    def get_updatable_packages(self, project_id: str) -> dict[str, str]:
+        _project_metadata = self._project_service.get_project_metadata(project_id)
+
+        if _project_metadata.interpreter is None:
+            raise ProjectInterpreterNotConfigured()
+
         _venv = VirtualEnvironment()
-        _venv_config = VenvConfig(python_executable=python_executable)
+        _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
 
         _venv.load(_venv_config)
         try:
@@ -117,4 +134,20 @@ class VenvManagerService:
                 title="Error during the fetching of updatable packages",
                 description=str(e),
                 error_code=500,
+            )
+
+    def update_package(self, project_id: str, package_name: str):
+        _project_metadata = self._project_service.get_project_metadata(project_id)
+        if _project_metadata.interpreter is None:
+            raise ProjectInterpreterNotConfigured()
+
+        _venv = VirtualEnvironment()
+        _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
+
+        _venv.load(_venv_config)
+        try:
+            _venv.update(package_name)
+        except ValueError as e:
+            raise VenvCommandFailed(
+                title="Error during package update", description=str(e), error_code=500
             )

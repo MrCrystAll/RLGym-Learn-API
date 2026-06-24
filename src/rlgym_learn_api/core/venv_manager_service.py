@@ -102,3 +102,19 @@ class VenvManagerService:
                 description=str(e),
                 error_code=500,
             )
+
+    def get_updatable_packages(
+        self, python_executable: str | os.PathLike[str]
+    ) -> dict[str, str]:
+        _venv = VirtualEnvironment()
+        _venv_config = VenvConfig(python_executable=python_executable)
+
+        _venv.load(_venv_config)
+        try:
+            return _venv.get_all_update_status()
+        except ValueError as e:
+            raise VenvCommandFailed(
+                title="Error during the fetching of updatable packages",
+                description=str(e),
+                error_code=500,
+            )

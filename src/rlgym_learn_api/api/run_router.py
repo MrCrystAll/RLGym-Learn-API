@@ -1,7 +1,6 @@
-import json
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel

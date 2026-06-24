@@ -86,3 +86,23 @@ def install_package(
         return f"The package {args.package_name} has been successfully installed."
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
+
+
+@router.post(
+    "/package_update",
+    responses={
+        200: {"model": dict[str, str]},
+        500: {"model": RLGymLearnApiExceptionModel},
+    },
+    operation_id="get_updatable_packages",
+)
+def get_updatable_packages(
+    args: VenvConfig,
+    venv_manager_service: Annotated[
+        VenvManagerService, Depends(get_venv_manager_service)
+    ],
+):
+    try:
+        return venv_manager_service.get_updatable_packages(args.python_executable)
+    except RLGymLearnApiException as e:
+        return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)

@@ -76,10 +76,9 @@ class VenvManagerService:
 
         try:
             _venv.delete()
-            self._project_service.update_project_metadata(
-                project_id=project_id,
-                project_metadata=ProjectUpdateMetadata(interpreter=None),
-            )
+            self._project_service.update_interpreter(
+                project_id=project_id, interpreter=None
+            )  # Set to None to show the user that the project now has nothing as the interpreter
         except OSError as e:
             raise VenvDeletionFailed(str(e), 500)
 

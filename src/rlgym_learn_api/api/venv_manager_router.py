@@ -21,6 +21,7 @@ router = APIRouter(prefix="/venv", tags=["venv"])
         200: {"model": VenvConfig},
         500: {"model": RLGymLearnApiExceptionModel},
     },
+    operation_id="create_venv",
 )
 def create_venv(
     args: VenvCreationArgs,
@@ -34,5 +35,26 @@ def create_venv(
             project_id=args.project_id,
             python_executable=args.python_executable,
         )
+    except RLGymLearnApiException as e:
+        return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
+
+
+@router.delete(
+    "",
+    responses={
+        200: {"model": None},
+        404: {"model": RLGymLearnApiExceptionModel},
+        500: {"model": RLGymLearnApiExceptionModel},
+    },
+    operation_id="delete_venv",
+)
+def delete_venv(
+    args: VenvConfig,
+    venv_manager_service: Annotated[
+        VenvManagerService, Depends(get_venv_manager_service)
+    ],
+):
+    try:
+        venv_manager_service.delete_venv(args)
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)

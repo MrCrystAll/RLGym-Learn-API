@@ -5,13 +5,20 @@ from rlgym_learn_venv_manager.api.factory import (
     VenvFactoryConfig,
     VirtualEnvironmentFactory,
 )
+from rlgym_learn_venv_manager.api.virtual_environment import (
+    VenvConfig,
+    VirtualEnvironment,
+)
 
 from rlgym_learn_api.core.project_service import ProjectService
 from rlgym_learn_api.desc.venv_manager.crud_operations import (
     VenvPreset,
     get_preset_dependencies,
 )
-from rlgym_learn_api.desc.venv_manager.exceptions import VenvCreationFailed
+from rlgym_learn_api.desc.venv_manager.exceptions import (
+    VenvCreationFailed,
+    VenvDeletionFailed,
+)
 
 
 class VenvManagerService:
@@ -45,3 +52,12 @@ class VenvManagerService:
         except ValueError as e:
             raise VenvCreationFailed(description=str(e), error_code=500)
         return _venv.config
+
+    def delete_venv(self, venv_config: VenvConfig):
+        _venv = VirtualEnvironment()
+        _venv.load(venv_config)
+
+        try:
+            _venv.delete()
+        except OSError as e:
+            raise VenvDeletionFailed(str(e), 500)

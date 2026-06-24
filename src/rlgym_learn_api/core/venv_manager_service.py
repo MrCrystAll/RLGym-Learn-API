@@ -65,14 +65,7 @@ class VenvManagerService:
         return _venv.config
 
     def delete_venv(self, project_id: str):
-        _project_metadata = self._project_service.get_project_metadata(project_id)
-        if _project_metadata.interpreter is None:
-            raise ProjectInterpreterNotConfigured()
-        self._assert_venv_exists(_project_metadata.interpreter)
-
-        _venv = VirtualEnvironment()
-        _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
-        _venv.load(_venv_config)
+        _venv = self._load_venv_from_project_id(project_id)
 
         try:
             _venv.delete()
@@ -88,12 +81,7 @@ class VenvManagerService:
                 f"Virtual environment not found at path {python_executable}"
             )
 
-    def install(
-        self,
-        project_id: str,
-        package_name: str,
-        *extra_args: str,
-    ):
+    def _load_venv_from_project_id(self, project_id: str) -> VirtualEnvironment:
         _project_metadata = self._project_service.get_project_metadata(project_id)
 
         if _project_metadata.interpreter is None:
@@ -103,6 +91,15 @@ class VenvManagerService:
         _venv = VirtualEnvironment()
         _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
         _venv.load(_venv_config)
+        return _venv
+
+    def install(
+        self,
+        project_id: str,
+        package_name: str,
+        *extra_args: str,
+    ):
+        _venv = self._load_venv_from_project_id(project_id)
 
         if package_name in _venv.pip.list().keys():
             raise PackageExists(f"The package {package_name} already exists.")
@@ -116,16 +113,22 @@ class VenvManagerService:
                 error_code=500,
             )
 
+    def install_requirements(
+        self, project_id: str, requirements_path: str | os.PathLike[str], *args
+    ):
+        _venv = self._load_venv_from_project_id(project_id)
+
+        try:
+            _venv.install_requirements(requirements_path, *args)
+        except ValueError as e:
+            raise VenvCommandFailed(
+                title="Error during requirements installation",
+                description=str(e),
+                error_code=500,
+            )
+
     def get_updatable_packages(self, project_id: str) -> dict[str, str]:
-        _project_metadata = self._project_service.get_project_metadata(project_id)
-
-        if _project_metadata.interpreter is None:
-            raise ProjectInterpreterNotConfigured()
-
-        _venv = VirtualEnvironment()
-        _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
-
-        _venv.load(_venv_config)
+        _venv = self._load_venv_from_project_id(project_id)
         try:
             return _venv.get_all_update_status()
         except ValueError as e:
@@ -136,14 +139,7 @@ class VenvManagerService:
             )
 
     def update_package(self, project_id: str, package_name: str):
-        _project_metadata = self._project_service.get_project_metadata(project_id)
-        if _project_metadata.interpreter is None:
-            raise ProjectInterpreterNotConfigured()
-
-        _venv = VirtualEnvironment()
-        _venv_config = VenvConfig(python_executable=_project_metadata.interpreter)
-
-        _venv.load(_venv_config)
+        _venv = self._load_venv_from_project_id(project_id)
         try:
             _venv.update(package_name)
         except ValueError as e:

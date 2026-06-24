@@ -36,6 +36,12 @@ class VenvUpdateArgs(BaseModel):
     package_name: str
 
 
+class VenvInstallRequirementsArgs(BaseModel):
+    project_id: str
+    requirements_path: str | os.PathLike[str]
+    extra_args: list[str] = Field(default_factory=list)
+
+
 def _rlgym_dependencies(preset: VenvRLGymPreset) -> list[str]:
     match preset:
         case VenvRLGymPreset.API:

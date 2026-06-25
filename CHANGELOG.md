@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A bunch of new endpoints under the prefix "/venv"
+  - POST "/" allows you to create a virtual environment in the project's filesystem.
+  - DELETE "/" allows you to delete (if exists) the virtual environment of the project.
+  - GET "/" allows you to list all the packages of the project's virtual environment.
+  - POST "/install" allows you to install a package to the virtual environment.
+  - POST "/update" allows you to update a package of the virtual environment.
+  - POST "/uninstall" allows you to uninstall a package from the virtual environment (If the package doesn't exist, the API will say that it has been successful uninstalling it).
+  - POST "/install_requirements" allows you to pass a requirements file and install everything in it to the virtual environment.
+  - GET "/package_update" allows you to fetch all the updatable packages.
+
 ## [0.1.6] - 2026-06-17
 
 ### Added

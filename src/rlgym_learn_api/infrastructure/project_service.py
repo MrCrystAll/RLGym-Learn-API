@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 
 from rlgym_learn_api.desc.project.project import ProjectMetadata
@@ -19,6 +20,12 @@ class InfrastructureProjectService(ABC):
     @abstractmethod
     def update_project_metadata(
         self, path: str, project_id: str, metadata: ProjectUpdateMetadata
+    ):
+        pass
+
+    @abstractmethod
+    def update_project_interpreter(
+        self, path: str, project_id: str, interpreter: str | os.PathLike[str] | None
     ):
         pass
 

@@ -6,7 +6,7 @@ import shutil
 import numpy as np
 from rlgym_learn.basic_config import BaseConfigModel, SerdeTypesModel
 from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
-from rlgym_learn.rlgym_learn import PyAnySerdeType
+from rlgym_learn.pyany_serde import PyAnySerdeType
 
 from rlgym_learn_api.paths import get_root
 

@@ -46,6 +46,20 @@ class FSProjectService(InfrastructureProjectService):
 
         return _id
 
+    def update_project_interpreter(
+        self, path: str, project_id: str, interpreter: str | os.PathLike[str] | None
+    ):
+        _path = pathlib.Path(os.path.join(path, project_id))
+        if not os.path.exists(_path):
+            raise OSError("The specified project doesn't exist")
+
+        _pyd_config = ProjectMetadata.model_validate_json(
+            (_path / PROJECT_CONFIG_JSON_FILE).read_text()
+        )
+
+        _pyd_config.interpreter = interpreter
+        (_path / PROJECT_CONFIG_JSON_FILE).write_text(_pyd_config.model_dump_json())
+
     def update_project_metadata(
         self, path: str, project_id: str, metadata: ProjectUpdateMetadata
     ):

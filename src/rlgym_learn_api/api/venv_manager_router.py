@@ -182,3 +182,23 @@ def uninstall_package(
         return f"Package {args.package_name} has been successfully uninstalled from the project {args.project_id}"
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
+
+
+@router.get(
+    "",
+    responses={
+        200: {"model": dict[str, str]},
+        404: {"model": RLGymLearnApiExceptionModel},
+        500: {"model": RLGymLearnApiExceptionModel},
+    },
+)
+def list_packages(
+    project_id: str,
+    venv_manager_service: Annotated[
+        VenvManagerService, Depends(get_venv_manager_service)
+    ],
+):
+    try:
+        return venv_manager_service.list_packages(project_id)
+    except RLGymLearnApiException as e:
+        return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)

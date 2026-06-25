@@ -157,3 +157,15 @@ class VenvManagerService:
                 description=str(e),
                 error_code=500,
             )
+
+    def list_packages(self, project_id: str):
+        _venv = self._load_venv_from_project_id(project_id)
+
+        try:
+            return _venv.get_all_packages()
+        except ValueError as e:
+            raise VenvCommandFailed(
+                title="Error during package listing",
+                description=str(e),
+                error_code=500,
+            )

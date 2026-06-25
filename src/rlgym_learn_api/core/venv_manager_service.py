@@ -146,3 +146,14 @@ class VenvManagerService:
             raise VenvCommandFailed(
                 title="Error during package update", description=str(e), error_code=500
             )
+
+    def uninstall_package(self, project_id: str, package_name):
+        _venv = self._load_venv_from_project_id(project_id)
+        try:
+            _venv.uninstall(package_name)
+        except ValueError as e:
+            raise VenvCommandFailed(
+                title="Error during package uninstallation",
+                description=str(e),
+                error_code=500,
+            )

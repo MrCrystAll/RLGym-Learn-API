@@ -14,6 +14,7 @@ from rlgym_learn_api.desc.venv_manager.crud_operations import (
     VenvCreationArgs,
     VenvInstallArgs,
     VenvInstallRequirementsArgs,
+    VenvUninstallArgs,
     VenvUpdateArgs,
 )
 
@@ -156,5 +157,28 @@ def install_requirements(
             *args.extra_args,
         )
         return f"Requirements successfully installed for project {args.project_id}."
+    except RLGymLearnApiException as e:
+        return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
+
+
+@router.post(
+    "/uninstall",
+    responses={
+        200: {"model": str},
+        404: {"model": RLGymLearnApiExceptionModel},
+        500: {"model": RLGymLearnApiExceptionModel},
+    },
+)
+def uninstall_package(
+    args: VenvUninstallArgs,
+    venv_manager_service: Annotated[
+        VenvManagerService, Depends(get_venv_manager_service)
+    ],
+):
+    try:
+        venv_manager_service.uninstall_package(
+            project_id=args.project_id, package_name=args.package_name
+        )
+        return f"Package {args.package_name} has been successfully uninstalled from the project {args.project_id}"
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)

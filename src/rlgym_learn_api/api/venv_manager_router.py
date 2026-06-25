@@ -25,6 +25,7 @@ router = APIRouter(prefix="/venv", tags=["venv"])
     "",
     responses={
         200: {"model": VenvConfig},
+        404: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="create_venv",

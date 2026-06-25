@@ -51,6 +51,7 @@ def create_venv(
     responses={
         200: {"model": str},
         404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="delete_venv",
@@ -74,6 +75,7 @@ def delete_venv(
         200: {"model": str},
         404: {"model": RLGymLearnApiExceptionModel},
         409: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="install_package",
@@ -98,6 +100,7 @@ def install_package(
     responses={
         200: {"model": dict[str, str]},
         404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="get_updatable_packages",
@@ -119,6 +122,7 @@ def get_updatable_packages(
     responses={
         200: {"model": str},
         404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="update_package",
@@ -141,6 +145,7 @@ def update_package(
     responses={
         200: {"model": str},
         404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
     operation_id="install_requirements",
@@ -167,6 +172,7 @@ def install_requirements(
     responses={
         200: {"model": str},
         404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
 )
@@ -190,6 +196,7 @@ def uninstall_package(
     responses={
         200: {"model": dict[str, str]},
         404: {"model": RLGymLearnApiExceptionModel},
+        417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
 )

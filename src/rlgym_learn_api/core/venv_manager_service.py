@@ -1,14 +1,20 @@
 import os
+import sys
 from os.path import abspath
 
 from rlgym_learn_venv_manager.api.factory import (
     VenvFactoryConfig,
     VirtualEnvironmentFactory,
 )
+from rlgym_learn_venv_manager.api.python_utils import (
+    get_python_default_executables,
+    get_python_version,
+)
 from rlgym_learn_venv_manager.api.virtual_environment import (
     VenvConfig,
     VirtualEnvironment,
 )
+from rlgym_learn_venv_manager.core.process import run_subprocess
 
 from rlgym_learn_api.core.project_service import ProjectService
 from rlgym_learn_api.desc.project.project_crud_schemas import ProjectUpdateMetadata
@@ -166,6 +172,25 @@ class VenvManagerService:
         except ValueError as e:
             raise VenvCommandFailed(
                 title="Error during package listing",
+                description=str(e),
+                error_code=500,
+            )
+
+    def get_python_default_executables(self) -> dict[str, str]:
+        try:
+            _interpreters = get_python_default_executables()
+            _versions = {}
+
+            for _interpreter in _interpreters:
+                if _interpreter == sys.executable:  # Remove bundled python
+                    continue
+
+                _versions[_interpreter] = get_python_version(_interpreter)
+
+            return _versions
+        except ValueError as e:
+            raise VenvCommandFailed(
+                title="Error while fetching default python executables",
                 description=str(e),
                 error_code=500,
             )

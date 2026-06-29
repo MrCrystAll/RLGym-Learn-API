@@ -14,7 +14,6 @@ from rlgym_learn_venv_manager.api.virtual_environment import (
     VenvConfig,
     VirtualEnvironment,
 )
-from rlgym_learn_venv_manager.core.process import run_subprocess
 
 from rlgym_learn_api.core.project_service import ProjectService
 from rlgym_learn_api.desc.project.project_crud_schemas import ProjectUpdateMetadata

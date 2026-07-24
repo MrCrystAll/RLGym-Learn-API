@@ -1,8 +1,10 @@
+import os
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from rlgym_learn_venv_manager.api.virtual_environment import VenvConfig
+from rlgym_learn_venv_manager.core.return_data import PackageInfo
 
 from rlgym_learn_api.api.services import get_venv_manager_service
 from rlgym_learn_api.core.venv_manager_service import VenvManagerService
@@ -194,7 +196,7 @@ def uninstall_package(
 @router.get(
     "",
     responses={
-        200: {"model": dict[str, str]},
+        200: {"model": dict[str, PackageInfo]},
         404: {"model": RLGymLearnApiExceptionModel},
         417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
@@ -208,5 +210,24 @@ def list_packages(
 ):
     try:
         return venv_manager_service.list_packages(project_id)
+    except RLGymLearnApiException as e:
+        return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)
+
+
+@router.get(
+    "/python_defaults",
+    responses={
+        200: {"model": dict[str | os.PathLike[str], str]},
+        500: {"model": RLGymLearnApiExceptionModel},
+    },
+    operation_id="get_default_python_executables",
+)
+def get_default_python_executables(
+    venv_manager_service: Annotated[
+        VenvManagerService, Depends(get_venv_manager_service)
+    ],
+):
+    try:
+        return venv_manager_service.get_python_default_executables()
     except RLGymLearnApiException as e:
         return JSONResponse(content=e.to_dict().model_dump(), status_code=e.error_code)

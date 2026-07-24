@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from rlgym_learn_venv_manager.api.virtual_environment import VenvConfig
+from rlgym_learn_venv_manager.core.return_data import PackageInfo
 
 from rlgym_learn_api.api.services import get_venv_manager_service
 from rlgym_learn_api.core.venv_manager_service import VenvManagerService
@@ -195,7 +196,7 @@ def uninstall_package(
 @router.get(
     "",
     responses={
-        200: {"model": dict[str, str]},
+        200: {"model": dict[str, PackageInfo]},
         404: {"model": RLGymLearnApiExceptionModel},
         417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},

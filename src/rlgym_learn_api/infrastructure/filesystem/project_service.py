@@ -21,8 +21,6 @@ PROJECT_CONFIG_JSON_FILE = "project_config.json"
 class FSProjectService(InfrastructureProjectService):
     def create_project(self, path: str, project_args: ProjectCreationArgs) -> str:
 
-        if project_args.interpreter is None:
-            raise ValueError("Validation failed for project creation")
         if not os.path.exists(path):
             raise OSError(f"Folder path {path} doesn't exist")
 
@@ -35,7 +33,7 @@ class FSProjectService(InfrastructureProjectService):
             ProjectMetadata(
                 name=project_args.name,
                 id=_id,
-                interpreter=project_args.interpreter,
+                interpreter=None,
                 created_at_version=__version__,
             ).model_dump_json()
         )

@@ -23,9 +23,6 @@ class ProjectService:
         self.root_folder = args.path
 
     def create_project(self, project_args: ProjectCreationArgs):
-        if project_args.interpreter is None:
-            project_args.interpreter = "python"
-
         try:
             return self.infra_service.create_project(self.root_folder, project_args)
         except ValueError as e:

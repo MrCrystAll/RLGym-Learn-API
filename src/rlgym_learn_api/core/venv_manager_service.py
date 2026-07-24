@@ -106,7 +106,7 @@ class VenvManagerService:
     ):
         _venv = self._load_venv_from_project_id(project_id)
 
-        if package_name in _venv.pip.list().keys():
+        if package_name in _venv.pip.list():
             raise PackageExists(f"The package {package_name} already exists.")
 
         try:

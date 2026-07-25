@@ -1,5 +1,4 @@
-from typing import Any
-
+from rlgym_learn.learning_coordinator_config import LearningCoordinatorConfigModel
 from rlgym_learn_algos.ppo.ppo_agent_controller import PPOAgentControllerConfigModel
 
 from rlgym_learn_api.core.project_service import ProjectService
@@ -57,12 +56,12 @@ class RunService:
         return self.infra_service.get_runs(self.project_service.root_folder, project_id)
 
     def update_run_data(
-        self, project_id: str, run_name: str, raw_config: dict[str, Any]
+        self, project_id: str, run_name: str, config: LearningCoordinatorConfigModel
     ):
         self._check_project_exists(project_id)
         try:
             self.infra_service.update_run_data(
-                self.project_service.root_folder, project_id, run_name, raw_config
+                self.project_service.root_folder, project_id, run_name, config
             )
         except FileNotFoundError as e:
             raise RunConfigMissingError(str(e), run_name=run_name) from e

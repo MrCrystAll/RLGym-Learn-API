@@ -177,6 +177,7 @@ def install_requirements(
         417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
+    operation_id="uninstall_package"
 )
 def uninstall_package(
     args: VenvUninstallArgs,
@@ -201,6 +202,7 @@ def uninstall_package(
         417: {"model": RLGymLearnApiExceptionModel},
         500: {"model": RLGymLearnApiExceptionModel},
     },
+    operation_id="list_packages"
 )
 def list_packages(
     project_id: str,

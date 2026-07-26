@@ -15,7 +15,7 @@ from rlgym_learn_api.api.run_router import router as run_router
 from rlgym_learn_api.api.session_router import router as session_router
 from rlgym_learn_api.api.venv_manager_router import router as venv_manager_router
 
-app = FastAPI(version=rlgym_learn_api.__version__)
+app = FastAPI(version=rlgym_learn_api.__version__, separate_input_output_schemas=False)
 
 app.add_middleware(
     CORSMiddleware,

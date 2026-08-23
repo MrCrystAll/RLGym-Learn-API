@@ -11,7 +11,7 @@ from argparse import ArgumentParser
 from packaging.version import parse
 
 from rlgym_learn_api import __version__
-from rlgym_learn_api.desc.project.project import ProjectMetadata
+from rlgym_learn_api.desc.project.project import AdvancedConfigModel, ProjectMetadata
 
 if __name__ == "__main__":
     arg_parser = ArgumentParser()
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         _config = json.load(config_file)
 
     # ---------------- Version assertion ----------------
-    if "created_at_version" not in _config.keys():
+    if "created_at_version" not in _config:
         _config["created_at_version"] = (
             "0.1.5"  # 0.1.6-dev.1 is when "created_at_version" got implemented, so i go to the previous patch
         )
@@ -53,10 +53,14 @@ if __name__ == "__main__":
     _project_version = parse(_config["created_at_version"])
     _api_version = parse(__version__)
 
+    # Implemented in 0.1.7-dev.6
+    if "advanced_config" not in _config:
+        _config["advanced_config"] = AdvancedConfigModel().model_dump()
+
     # If same version than API, ignore and quit
     if _project_version == _api_version:
         print(
-            f"Project {_pid} is up to date with the API (Current version: {str(_api_version)})"
+            f"Project {_pid} is up to date with the API (Current version: {_api_version})"
         )
         sys.exit(2)
 

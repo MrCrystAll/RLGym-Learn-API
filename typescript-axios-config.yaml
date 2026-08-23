@@ -10,3 +10,4 @@ licenseName: "MIT"
 withInterfaces: true
 supportsES6: true
 basePath: "http://localhost:8000"
+axiosVersion: "1.18.1"

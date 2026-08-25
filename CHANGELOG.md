@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - POST "/uninstall" allows you to uninstall a package from the virtual environment (If the package doesn't exist, the API will say that it has been successful uninstalling it).
   - POST "/install_requirements" allows you to pass a requirements file and install everything in it to the virtual environment.
   - GET "/package_update" allows you to fetch all the updatable packages.
+- You can now specify an advanced configuration to the project creation, this will be used in the future for project settings.
 
 ## [0.1.6] - 2026-06-17
 

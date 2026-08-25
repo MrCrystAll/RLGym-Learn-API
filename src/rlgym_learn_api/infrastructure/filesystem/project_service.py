@@ -29,12 +29,13 @@ class FSProjectService(InfrastructureProjectService):
         _folder_path = pathlib.Path(os.path.join(path, _id))
         os.makedirs(_folder_path)
 
-        (_folder_path / PROJECT_CONFIG_JSON_FILE).write_text(
+        _ = (_folder_path / PROJECT_CONFIG_JSON_FILE).write_text(
             ProjectMetadata(
                 name=project_args.name,
                 id=_id,
                 interpreter=None,
                 created_at_version=__version__,
+                advanced_config=project_args.advanced_config
             ).model_dump_json()
         )
 

@@ -6,6 +6,7 @@ from rlgym_learn_api.desc.project.exceptions import (
     ProjectNotFoundError,
     ProjectRootFolderNotFound,
 )
+from rlgym_learn_api.desc.project.project import AdvancedConfigModel
 from rlgym_learn_api.desc.project.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
@@ -80,3 +81,6 @@ class ProjectService:
 
     def project_exists(self, project_id: str) -> bool:
         return self.infra_service.project_exists(self.root_folder, project_id)
+
+    def get_default_advanced_options(self) -> AdvancedConfigModel:
+        return AdvancedConfigModel()

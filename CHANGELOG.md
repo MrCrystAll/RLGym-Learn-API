@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - POST "/install_requirements" allows you to pass a requirements file and install everything in it to the virtual environment.
   - GET "/package_update" allows you to fetch all the updatable packages.
 - You can now specify an advanced configuration to the project creation, this will be used in the future for project settings.
+- GET "/project/advanced" allows you to get the default advanced options for project creation
 
 ## [0.1.6] - 2026-06-17
 

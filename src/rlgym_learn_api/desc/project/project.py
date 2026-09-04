@@ -7,7 +7,7 @@ class AdvancedConfigModel(BaseModel):
     """Optional config the user can tweak at project creation"""
 
     # Whether the user handles their own venv
-    user_handled_venv: bool = True
+    user_handled_venv: bool = False
 
 class ProjectMetadata(BaseModel):
     name: str

@@ -12,7 +12,7 @@ from rlgym_learn_api.desc.project.exceptions import (
     ProjectNotFoundError,
     ProjectRootFolderNotFound,
 )
-from rlgym_learn_api.desc.project.project import ProjectMetadata
+from rlgym_learn_api.desc.project.project import AdvancedConfigModel, ProjectMetadata
 from rlgym_learn_api.desc.project.project_crud_schemas import (
     ProjectCreationArgs,
     ProjectUpdateMetadata,
@@ -127,3 +127,10 @@ def get_project_metadata(
         return project_service.get_project_metadata(project_id)
     except (ProjectMalformed, ProjectNotFoundError) as e:
         return JSONResponse(e.to_dict().model_dump(), e.error_code)
+
+
+@router.get("/advanced", operation_id="get_default_advanced_options", responses={
+    200: {"model": AdvancedConfigModel}
+}, description="Returns the default advanced options for project creation")
+def get_default_advanced_options(project_service: Annotated[ProjectService, Depends(get_project_service)]):
+    return project_service.get_default_advanced_options()
